@@ -18,12 +18,13 @@
   "bugs": "",
   "keywords": [],
   "author": {
-    "name": "",
+    "name": "team_47",
     "email": "",
-    "url": ""
+    "url": "https://github.com/VoDongVan/CS326_project"
   },
   "contributors": [
-
+    "Van Vo",
+    "Quan Vo"
   ],
   "scripts": {
     "dev": "",
