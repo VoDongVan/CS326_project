@@ -53,3 +53,16 @@ h2 {
 p:hover {
     color: darkblue;
 }
+
+.img-container {
+    text-align: center;
+}
+
+.img-container img {
+    height: 400px; 
+    width: auto;
+}
+
+.nav-wrapper {
+    text-align: center;
+}
