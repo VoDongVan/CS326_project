@@ -1,0 +1,54 @@
+
+#team :not(.exclude) {
+    display: flex;
+    flex-direction: column; 
+    width: 400px;
+}
+
+#team {
+    display: flex; 
+    flex-direction: row;
+}
+section#team div {
+     /* Stack child elements vertically inside each div */
+   
+    padding: 20px; 
+    border: 1px solid #ccc;
+    width: 400px;
+    margin:40px;
+    
+}
+
+.exclude {
+    margin: 40px;
+    height: 1px;
+    width: 3px;
+    margin-left: 20px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+}
+
+nav > a {
+    margin-left: 40px; 
+    margin-right: 40px;
+}
+
+nav > a:hover {
+    color: lightblue;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+p:hover {
+    color: darkblue;
+}
+
