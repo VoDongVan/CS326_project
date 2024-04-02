@@ -23,10 +23,10 @@
     "url": "https://github.com/VoDongVan/CS326_project"
   },
   "contributors": [
-    "Van Vo",
-    "Quan Vo",
+    "Van Vo vdvo@umass.edu VoDongVan",
+    "Quan Vo qdvo@umass.edu Quan Vo",
     "Rubens Nherisson rnherisson@umass.edu rubens455",
-    "Zih Nche"
+    "Zih Nche znche@umass.edu znche"
   ],
   "scripts": {
     "start": "http-server src/docs/milestone-01 -p 3000 -c-1 -o -s",

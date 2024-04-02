@@ -2,12 +2,14 @@
 #team :not(.exclude) {
     display: flex;
     flex-direction: column; 
+    align-items: center;
     width: 400px;
 }
 
 #team {
-    display: flex; 
+    display: flex;
     flex-direction: row;
+    align-items: flex-start;
 }
 section#team div {
      /* Stack child elements vertically inside each div */
@@ -51,4 +53,3 @@ h2 {
 p:hover {
     color: darkblue;
 }
-
