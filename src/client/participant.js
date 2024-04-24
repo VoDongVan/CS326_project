@@ -4,12 +4,13 @@ let homepageView = document.getElementById('homepage-view');
 let dateListView = document.getElementById('datelist-view');
 let quizListView = document.getElementById('quizlist-view');
 let quizView = document.getElementById('quiz-view');
-
+let createQuizView = document.getElementById("create-quiz-view");
 function hideAllView() {
     homepageView.style.display = 'none';
     dateListView.style.display = 'none';
     quizListView.style.display = 'none';
     quizView.style.display = 'none';
+    createQuizView.style.display = 'none';
 }
  
 function showQuiz(quiz) {
@@ -18,6 +19,8 @@ function showQuiz(quiz) {
 
     let question = document.createElement('h1');
     question.innerHTML = quiz.question;
+    let timer = document.createElement('h2');
+    timer.innerHTML = quiz.timer.getHours() + ":" + quiz.timer.getMinutes() + ":" + quiz.timer.getSeconds();
     let optionList = document.createElement('div');
     optionList.id = 'option-list';
     for (let i = 0; i < quiz.options.length; ++i) {
@@ -43,11 +46,83 @@ function showQuiz(quiz) {
     });
 
     quizView.appendChild(question);
+    quizView.appendChild(timer);
     quizView.appendChild(optionList);
     quizView.appendChild(toQuizListButton);
 }
 
-function showQuizList(dateInfo) {
+function createNewQuiz(dateInfo, state) {
+    let createQuizView = document.getElementById('create-quiz-view');
+    let reset = () => {
+        createQuizView.innerHTML = `<label for="question">Question:</label>
+        <input type='text' id='question' required>
+        <label for='num-options'>How many options for this question?</label>
+        <input type='number' id='num-options'>
+        <div id='option-input-container'></div>`;
+    };
+
+    hideAllView();
+    createQuizView.style.display = 'block';
+    let submitParameterButton = document.createElement('button');
+    submitParameterButton.innerHTML = "choose this questions and number of options?";
+    submitParameterButton.addEventListener('click', () => {
+        let question = document.getElementById('question').value;
+        let numOption = parseInt(document.getElementById('num-options').value);
+        let optionInputContainer = document.getElementById("option-input-container");
+        for (let i = 0; i < numOption; ++i) {
+            let label = document.createElement('label');
+            label.htmlFor = 'option-input-' + i;
+            let input = document.createElement('input');
+            input.id = 'option-input-' + i;
+            input.type = 'text';
+            input.required = true;
+            optionInputContainer.appendChild(label);
+            optionInputContainer.appendChild(input);
+        }
+        let submitButton = document.createElement('button');
+        submitButton.innerHTML = 'submit';
+        submitButton.addEventListener('click', () => {
+            let newQuiz = {
+                question: question,
+                timer: new Date(0, 0, 0, 0, 1, 30),
+                options: []
+            };
+            for (let i = 0; i < numOption; ++i) {
+                let option = document.getElementById('option-input-' + i).value;
+                newQuiz.options.push(option);
+            }
+            dateInfo.quizlist.push(newQuiz);
+            quizListView.innerHTML = "<h1>Quiz List</h1>";
+            reset();
+            hideAllView();
+            showQuizList(dateInfo, state);
+        });
+        createQuizView.appendChild(submitButton);
+        submitParameterButton.remove();
+    });
+    createQuizView.appendChild(submitParameterButton);
+    let toQuizListButton = document.createElement('button');
+    toQuizListButton.id = 'to-quizlist';
+    toQuizListButton.innerHTML = 'Go Back';
+    toQuizListButton.addEventListener('click', () => {
+        hideAllView();
+        quizListView.style.display = 'block';
+        reset();
+    });
+    createQuizView.appendChild(toQuizListButton);
+}
+
+function addNewQuizButton(element, dateInfo, state) {
+    if (state === 'host') {
+        let newQuizButton = document.createElement('button');
+        newQuizButton.classList.add("new-quiz-button");
+        newQuizButton.innerHTML = 'Add New QUiz';
+        newQuizButton.addEventListener('click', () => createNewQuiz(dateInfo, state));
+        element.appendChild(newQuizButton);
+    }
+}
+
+function showQuizList(dateInfo, state) {
     hideAllView();
     let quizlist = dateInfo.quizlist;
     quizListView.style.display = 'block';
@@ -69,16 +144,38 @@ function showQuizList(dateInfo) {
     }
 
     quizListView.appendChild(toDateListButton);
+    addNewQuizButton(quizListView, dateInfo, state);
 }
 
-function showDateList(datelist) {
+function createNewDate(datelist, state) {
+    let newDateInfo = {date: new Date("2024-04-23"),
+                       quizlist: []};
+    datelist.push(newDateInfo);
+    dateListView.innerHTML = "<h1>Date List</h1>";
+    showDateList(datelist, state);
+}
+
+function addNewDateButton(element, datelist, state) {
+    if (state === 'host') {
+        let newDateButton = document.createElement('button');
+        newDateButton.classList.add("new-date-button");
+        newDateButton.innerHTML = 'Add New Date';
+        newDateButton.addEventListener('click', () => createNewDate(datelist, state));
+        element.appendChild(newDateButton);
+    }
+}
+
+function showDateList(datelist, state) {
     hideAllView();
     dateListView.style.display = 'block';
     for (let i = 0; i < datelist.length; ++i) {
         let button = document.createElement('button');
         button.classList.add("quizlist");
-        button.innerHTML = datelist[i].date;
-        button.addEventListener('click', () => showQuizList(datelist[i]));
+        button.innerHTML = datelist[i].date.toDateString();
+        button.addEventListener('click', () => {
+            showQuizList(datelist[i], state);
+        }
+        );
         dateListView.appendChild(button);
     }
     let toHomePageButton = document.createElement('button');
@@ -90,6 +187,7 @@ function showDateList(datelist) {
         homepageView.style.display = 'block';
     });
     dateListView.appendChild(toHomePageButton);
+    addNewDateButton(dateListView, datelist, state);
 }
  
 for (let i = 0; i < courseList.length; ++i) {
@@ -97,6 +195,8 @@ for (let i = 0; i < courseList.length; ++i) {
     let button = document.createElement('button');
     button.className = "item btn btn-primary p-4";
     button.innerHTML = courseList[i].courseName;
-    button.addEventListener('click', () => showDateList(courseList[i].datelist));
+    button.addEventListener('click', () => {
+        showDateList(courseList[i].datelist, courseList[i].state);
+    });
     courseContainer.appendChild(button);
 }
