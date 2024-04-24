@@ -1,12 +1,19 @@
-import { datelist, state } from "./data.js";
+import { courseList } from "./data.js";
 
+let homepageView = document.getElementById('homepage-view');
 let dateListView = document.getElementById('datelist-view');
 let quizListView = document.getElementById('quizlist-view');
 let quizView = document.getElementById('quiz-view');
 
-function showQuiz(quiz) {
+function hideAllView() {
+    homepageView.style.display = 'none';
     dateListView.style.display = 'none';
     quizListView.style.display = 'none';
+    quizView.style.display = 'none';
+}
+ 
+function showQuiz(quiz) {
+    hideAllView();
     quizView.style.display = 'block';
 
     let question = document.createElement('h1');
@@ -41,10 +48,9 @@ function showQuiz(quiz) {
 }
 
 function showQuizList(dateInfo) {
+    hideAllView();
     let quizlist = dateInfo.quizlist;
-
     quizListView.style.display = 'block';
-    dateListView.style.display = 'none';
 
     let toDateListButton = document.createElement('button');
     toDateListButton.id = 'to-datelist';
@@ -54,7 +60,6 @@ function showQuizList(dateInfo) {
         quizListView.innerHTML = "<h1>Quiz List</h1>";
         dateListView.style.display = 'block';
     });
-
     for (let i = 0; i < quizlist.length; ++i) {
         let button = document.createElement('button');
         button.classList.add("quiz");
@@ -65,11 +70,33 @@ function showQuizList(dateInfo) {
 
     quizListView.appendChild(toDateListButton);
 }
+
+function showDateList(datelist) {
+    hideAllView();
+    dateListView.style.display = 'block';
+    for (let i = 0; i < datelist.length; ++i) {
+        let button = document.createElement('button');
+        button.classList.add("quizlist");
+        button.innerHTML = datelist[i].date;
+        button.addEventListener('click', () => showQuizList(datelist[i]));
+        dateListView.appendChild(button);
+    }
+    let toHomePageButton = document.createElement('button');
+    toHomePageButton.id = 'to-homepage';
+    toHomePageButton.innerHTML = 'Go Back';
+    toHomePageButton.addEventListener('click', () => {
+        hideAllView();
+        dateListView.innerHTML = "<h1>Date List</h1>";
+        homepageView.style.display = 'block';
+    });
+    dateListView.appendChild(toHomePageButton);
+}
  
-for (let i = 0; i < datelist.length; ++i) {
+for (let i = 0; i < courseList.length; ++i) {
+    let courseContainer = document.getElementById('course-container');
     let button = document.createElement('button');
-    button.classList.add("quizlist");
-    button.innerHTML = datelist[i].date;
-    button.addEventListener('click', () => showQuizList(datelist[i]));
-    dateListView.appendChild(button);
+    button.className = "item btn btn-primary p-4";
+    button.innerHTML = courseList[i].courseName;
+    button.addEventListener('click', () => showDateList(courseList[i].datelist));
+    courseContainer.appendChild(button);
 }
