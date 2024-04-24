@@ -20,14 +20,15 @@
 }
 
 #create-quiz-view label {
-    align-self: center;
+    align-self: start;
+    margin: 10px 0px 5px 10px;
 }
 
 
 
 .view input {
-    border: 2px solid skyblue;
-    margin: 10px;
+    border: 2px solid gray;
+    margin: 5px 0px 10px 10px;
 }
 
 h1,
@@ -39,4 +40,8 @@ h2 {
 .quiz {
     margin: 10px;
     height: 100px;
+}
+
+#course-container {
+    overflow: scroll;
 }

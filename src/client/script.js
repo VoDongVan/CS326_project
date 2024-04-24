@@ -54,29 +54,51 @@ function showQuiz(quiz) {
     quizView.appendChild(toQuizListButton);
 }
 
+function checkRequired() {
+    let requiredInput = document.querySelectorAll("input[required]");
+    for (let i = 0; i < requiredInput.length; ++i) {
+        if (requiredInput[i].value === "") return false;
+    }
+    return true;
+}
+
 function createNewQuiz(dateInfo, state) {
     let createQuizView = document.getElementById('create-quiz-view');
     let reset = () => {
         createQuizView.innerHTML = `<label for="question">Question:</label>
-        <input type='text' id='question' required>
-        <label for='num-options'>How many options for this question?</label>
-        <input type='number' id='num-options'>
-        <div id='option-input-container'></div>`;
+        <input type="text" id="question" required>
+        <label for="num-options">How many options for this question?</label>
+        <input type="number" id="num-options" value="4" min="1" max="20">
+        <div id="option-input-container"></div>`;
     };
 
     hideAllView();
     createQuizView.style.display = 'flex';
     createQuizView.style.flexDirection = 'column';
     let submitParameterButton = document.createElement('button');
+    submitParameterButton.id = 'submit-parameter-button';
     submitParameterButton.innerHTML = "choose this questions and number of options?";
     submitParameterButton.addEventListener('click', () => {
-        let question = document.getElementById('question').value;
-        let numOption = parseInt(document.getElementById('num-options').value);
-        if (document.getElementById('question').value === "") {
-            alert("question cannot be blank");
+        if (!checkRequired()) {
+            alert('some required inputs are blank');
             return;
         }
+        let question = document.getElementById('question').value;
+        let numOption = parseInt(document.getElementById('num-options').value);
         let optionInputContainer = document.getElementById("option-input-container");
+        let label = document.createElement('label');
+        label.htmlFor = 'correct-option';
+        label.innerHTML = 'Choose Index of Correct Option';
+        let input = document.createElement('input');
+        input.id = 'correct-option';
+        input.type = 'number';
+        input.value = '1';
+        input.min = '1';
+        input.max = document.getElementById('num-options').value;
+        input.required = true;
+        optionInputContainer.appendChild(label);
+        optionInputContainer.appendChild(input);
+        
         for (let i = 0; i < numOption; ++i) {
             let label = document.createElement('label');
             label.htmlFor = 'option-input-' + i;
@@ -91,10 +113,15 @@ function createNewQuiz(dateInfo, state) {
         let submitButton = document.createElement('button');
         submitButton.innerHTML = 'submit';
         submitButton.addEventListener('click', () => {
+            if (!checkRequired()) {
+                alert('some required inputs are blank');
+                return;
+            }
             let newQuiz = {
                 question: question,
                 timer: new Date(0, 0, 0, 0, 1, 30),
-                options: []
+                options: [],
+                correct: parseInt(document.getElementById('correct-option').value),
             };
             for (let i = 0; i < numOption; ++i) {
                 let option = document.getElementById('option-input-' + i).value;
@@ -157,7 +184,8 @@ function showQuizList(dateInfo, state) {
 }
 
 function createNewDate(datelist, state) {
-    let newDateInfo = {date: new Date("2024-04-23"),
+    let date = document.getElementById("new-date-input").value;
+    let newDateInfo = {date: new Date(date),
                        quizlist: []};
     datelist.push(newDateInfo);
     dateListView.innerHTML = "<h1>Date List</h1>";
@@ -170,6 +198,10 @@ function addNewDateButton(element, datelist, state) {
         newDateButton.classList.add("new-date-button");
         newDateButton.innerHTML = 'Add New Date';
         newDateButton.addEventListener('click', () => createNewDate(datelist, state));
+        let input = document.createElement('input');
+        input.type = 'date';
+        input.id = 'new-date-input';
+        element.appendChild(input);
         element.appendChild(newDateButton);
     }
 }
@@ -206,6 +238,9 @@ for (let i = 0; i < courseList.length; ++i) {
     let button = document.createElement('button');
     button.className = "item btn btn-primary p-4";
     button.innerHTML = courseList[i].courseName;
+    if (courseList[i].state === "host") {
+        button.style['background-color'] = 'green';
+    }
     button.addEventListener('click', () => {
         showDateList(courseList[i].datelist, courseList[i].state);
     });

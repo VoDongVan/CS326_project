@@ -1,6 +1,3 @@
-import PouchDB from 'pouchdb';
-const db = new PouchDB("mydatabase");
-
 let courseList = [
     {
         courseName: "Course 1 Test",
@@ -110,24 +107,5 @@ let courseList = [
         ]
     }
 ];
-
-export async function saveData(doc) {
-    await db.put(doc);
- }
-
- export async function getData() {
-    const doc = await db.get('Courses').catch(function (err) {
-        if (err.name === 'not_found') {
-            // Default data
-            return {
-            _id: "Courses",
-            courseList: courseList,
-            };
-        } else { // hm, some other error
-          throw err;
-        }
-      });
-    return doc;
- } 
 
 export {courseList};
