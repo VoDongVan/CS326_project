@@ -13,7 +13,8 @@
 #to-quizlist,
 .new-date-button,
 .new-quiz-button,
-#option-list {
+#option-list,
+#submit-parameter-button {
     align-self: center;
     margin: 10px;
 }
@@ -22,8 +23,11 @@
     align-self: center;
 }
 
-label {
-    margin: 5px;
+
+
+.view input {
+    border: 2px solid skyblue;
+    margin: 10px;
 }
 
 h1,

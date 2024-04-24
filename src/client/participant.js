@@ -72,6 +72,10 @@ function createNewQuiz(dateInfo, state) {
     submitParameterButton.addEventListener('click', () => {
         let question = document.getElementById('question').value;
         let numOption = parseInt(document.getElementById('num-options').value);
+        if (document.getElementById('question').value === "") {
+            alert("question cannot be blank");
+            return;
+        }
         let optionInputContainer = document.getElementById("option-input-container");
         for (let i = 0; i < numOption; ++i) {
             let label = document.createElement('label');
