@@ -1,0 +1,38 @@
+#datelist-view,
+#quizlist-view,
+#quiz-view,
+#option-list,
+#create-quiz-view,
+#option-input-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#to-homepage,
+#to-datelist,
+#to-quizlist,
+.new-date-button,
+.new-quiz-button,
+#option-list {
+    align-self: center;
+    margin: 10px;
+}
+
+#create-quiz-view label {
+    align-self: center;
+}
+
+label {
+    margin: 5px;
+}
+
+h1,
+h2 {
+    text-align: center;
+}
+
+.quizlist,
+.quiz {
+    margin: 10px;
+    height: 100px;
+}
