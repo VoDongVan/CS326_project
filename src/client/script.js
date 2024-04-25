@@ -346,3 +346,40 @@ for (let i = 0; i < courseList.length; ++i) {
     });
     courseContainer.appendChild(button);
 }
+
+// JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
+const fgCircle = document.querySelector('.fg-circle');
+const percentageText = document.querySelector('.percentage');
+
+
+// Set progress percentage (e.g., 75%)
+const percentage = 12/15 * 100;
+const circumference = 1257; // Circumference of a circle with r=40
+const progress = circumference - (percentage / 100) * circumference;
+fgCircle.style.strokeDashoffset = progress;
+percentageText.textContent = percentage + '%';
+
+
+// Show statistic view
+function showStatisticView() {
+   // hide all view
+   hideAllView();
+   // show statistic view
+   statisticView.style.display = "block";
+   // add button to go back to homepage
+   let toHomePageButton = document.createElement('button');
+   toHomePageButton.id = 'to-homepage';
+   toHomePageButton.innerHTML = 'Go Back';
+   toHomePageButton.addEventListener('click', () => {
+       hideAllView();
+       homepageView.style.display = 'block';
+       toHomePageButton.remove();
+   });
+   toHomePageButton.style.display = 'flex';
+   toHomePageButton.style.alignSelf = 'center';
+   let container = document.getElementById("statistic-container");
+   container.appendChild(toHomePageButton);
+}
+// add event listner to statistic button such that clicking on it will bring us to statistic page
+let statButton = document.getElementById("statistic-button");
+statButton.addEventListener('click', showStatisticView);
