@@ -1,4 +1,7 @@
-import { courseList } from "./data.js";
+import { saveData, getData, removeData } from "./db.js";
+
+let courses = await getData();
+let courseList = courses.courseList;
 
 let homepageView = document.getElementById('homepage-view');
 let dateListView = document.getElementById('datelist-view');
@@ -56,10 +59,16 @@ function showQuiz(quiz) {
 
 function checkRequired() {
     let requiredInput = document.querySelectorAll("input[required]");
+    let flag = true;
     for (let i = 0; i < requiredInput.length; ++i) {
-        if (requiredInput[i].value === "") return false;
+        if (requiredInput[i].value === "") {
+            flag = false;
+            requiredInput[i].style['border'] = '2px solid red';
+        } else {
+            requiredInput[i].style['border'] = '2px solid green';
+        }
     }
-    return true;
+    return flag;
 }
 
 function createNewQuiz(dateInfo, state) {
@@ -128,6 +137,7 @@ function createNewQuiz(dateInfo, state) {
                 newQuiz.options.push(option);
             }
             dateInfo.quizlist.push(newQuiz);
+            saveData(courses);
             quizListView.innerHTML = "<h1>Quiz List</h1>";
             reset();
             hideAllView();
@@ -185,8 +195,9 @@ function showQuizList(dateInfo, state) {
 
 function createNewDate(datelist, state) {
     let date = document.getElementById("new-date-input").value;
-    let newDateInfo = {date: new Date(date),
+    let newDateInfo = {date: new Date(date + "T00:00:00+00:00"),
                        quizlist: []};
+    console.log(newDateInfo);
     datelist.push(newDateInfo);
     dateListView.innerHTML = "<h1>Date List</h1>";
     showDateList(datelist, state);
@@ -197,7 +208,10 @@ function addNewDateButton(element, datelist, state) {
         let newDateButton = document.createElement('button');
         newDateButton.classList.add("new-date-button");
         newDateButton.innerHTML = 'Add New Date';
-        newDateButton.addEventListener('click', () => createNewDate(datelist, state));
+        newDateButton.addEventListener('click', () => {
+            createNewDate(datelist, state);
+            saveData(courses);
+        });
         let input = document.createElement('input');
         input.type = 'date';
         input.id = 'new-date-input';

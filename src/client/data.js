@@ -10,13 +10,13 @@ let courseList = [
                         question: "1 + 1 = ",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["0", "1", "2", "3"],
-                        correct: 2,
+                        correct: 3,
                     },
                     {
                         question: "10 - 2 = ",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["7", "8", "9", "10"],
-                        correct: 1,
+                        correct: 2,
                     },
                 ]
             },
@@ -27,7 +27,7 @@ let courseList = [
                         question: "What is the color of the sky?",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["red", "green", "blue"],
-                        correct: 2,
+                        correct: 3,
                     },
                 ]
             },
@@ -38,7 +38,7 @@ let courseList = [
                         question: "Why does the mathbook look so sad?",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["because it has many problems", "because people cry looking at it"],
-                        correct: 0,
+                        correct: 1,
                     },
                 ]
             }
@@ -56,7 +56,7 @@ let courseList = [
                         question: "3 + 0 = ",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["0", "1", "2", "3"],
-                        correct: 3,
+                        correct: 4,
                     }
                 ]
             },
@@ -67,7 +67,7 @@ let courseList = [
                         question: "What is the color of a leaf?",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["gray", "green", "blue"],
-                        correct: 1,
+                        correct: 2,
                     },
                 ]
             },
@@ -78,7 +78,7 @@ let courseList = [
                         question: "Why does the scarecrow win an award?",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["because it is outstanding in its field", "I don't know"],
-                        correct: 0,
+                        correct: 1,
                     },
                 ]
             }
