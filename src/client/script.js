@@ -20,12 +20,13 @@ import { saveData, getData, removeData } from "./db.js";
 let courses = await getData();
 let courseList = courses.courseList;
 
-// Get view element. Currently, there are 5 views: homepage, datelist, quizlist, quiz, create-quiz
+// Get view element. Currently, there are 6 views: homepage, datelist, quizlist, quiz, create-quiz, statistic-view
 let homepageView = document.getElementById('homepage-view');
 let dateListView = document.getElementById('datelist-view');
 let quizListView = document.getElementById('quizlist-view');
 let quizView = document.getElementById('quiz-view');
 let createQuizView = document.getElementById("create-quiz-view");
+let statisticView = document.getElementById('statistic-view');
 
 /**
  * Set display of all view to none. This function is used when switching view
@@ -36,6 +37,7 @@ function hideAllView() {
     quizListView.style.display = 'none';
     quizView.style.display = 'none';
     createQuizView.style.display = 'none';
+    statisticView.style.display = 'none';
 }
 
 /**

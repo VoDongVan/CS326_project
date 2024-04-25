@@ -45,3 +45,47 @@ h2 {
 #course-container {
     overflow: scroll;
 }
+
+/* Style for statistics*/
+#statistic-view .container2 {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+   
+   
+}
+
+.circle-wrapper {
+    margin-top: 2px;
+    width: 700px; /* Width of the SVG */
+    height: 600px; /* Height of the SVG */
+    display: flex;
+    justify-content: center;
+}
+       
+.bg-circle {
+    fill: none;
+    stroke: #d80b0b; /* Background color */
+    stroke-width: 30;
+}
+
+
+.fg-circle {
+    fill: none;
+    stroke: #18e31f; /* Foreground color */
+    stroke-width: 30;
+    stroke-dasharray: 1257; /* Circumference of a circle with r=40 */
+    stroke-dashoffset: 1257; /* To initially hide the progress */
+    transition: stroke-dashoffset 1s ease; /* Smooth animation */
+}
+
+
+.percentage {
+    font-size: 100px;
+    fill: #333; /* Text color */
+    font-family: Arial, sans-serif;
+}
+
+/* Style for statistics end here*/
