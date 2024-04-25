@@ -15,3 +15,5 @@ Applications navigation: <br />
 
 Initially, the homepage will be shown annd there will be a list of mocked courses. For now, courses with color blue means the user is just a participant of that course, whereas green means the user is the host of that course.
 Clicking on the course will move to the date list view, listing the dates with quizzes. Clicking on a date will move to the quizzes list view, showing the quizzes for that date. Clicking on a quiz to move to the quiz view. There will be a corresseponding button for moving back to the previous view. <br />
+
+For course where the user is host, we have the option to add new date or quizzes. There will be guidings on screen to instruct the user what information needed to be filled.
