@@ -14,13 +14,50 @@
  * @property {Quiz[]} quizlist - list of quizzes on this date
  */
 
-import { saveData, getData, removeData } from "./db.js";
+// import { removeData, deleteAll } from "../server/db.js";
+
+const URL = "http://localhost:3260"; // URL of our server
+
+async function deleteAll() {
+    const response = await fetch(`${URL}/deleteAll`, {
+        method: "DELETE",
+    });
+    console.log(response.text());
+}
+
+async function saveData(data) {
+    const response = await fetch(`${URL}/save`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+    console.log(response.text());
+}
+ 
+async function getData(user_id) {
+    const response = await fetch(`${URL}/get?userID=${user_id}`, {
+        method: "GET",
+    });
+    const data = await response.json();
+    // convert string to date
+    data.courseList.forEach(course => {
+        course.datelist.forEach(date => {
+        date.date = new Date(date.date);
+        date.quizlist.forEach(quiz => quiz.timer = new Date(quiz.timer));
+        });
+    });
+    return data;
+}
+ 
 
 // get courses data from database
-let courses = await getData();
-let courseList = courses.courseList;
+let courses = null;
+let courseList = null;
 
 // Get view element. Currently, there are 6 views: homepage, datelist, quizlist, quiz, create-quiz, statistic-view
+let loginView = document.getElementById('login-view');
 let homepageView = document.getElementById('homepage-view');
 let dateListView = document.getElementById('datelist-view');
 let quizListView = document.getElementById('quizlist-view');
@@ -28,10 +65,12 @@ let quizView = document.getElementById('quiz-view');
 let createQuizView = document.getElementById("create-quiz-view");
 let statisticView = document.getElementById('statistic-view');
 
+let userID = null;
 /**
  * Set display of all view to none. This function is used when switching view
  */
 function hideAllView() {
+    loginView.style.display = 'none';
     homepageView.style.display = 'none';
     dateListView.style.display = 'none';
     quizListView.style.display = 'none';
@@ -40,6 +79,10 @@ function hideAllView() {
     statisticView.style.display = 'none';
 }
 
+function resetHomepage() {
+    let courseContainer = document.getElementById('course-container');
+    courseContainer.innerHTML = "";
+}
 /**
  * Show quiz-view. Generate content for the quiz-view. There are 4 contents:
  * The question, the timer, the multiple options, and go back button
@@ -157,7 +200,7 @@ function createNewQuiz(dateInfo, state) {
         optionInputContainer.appendChild(label);
         optionInputContainer.appendChild(input);
         // generate input fields for options
-        for (let i = 0; i < numOption; ++i) {
+        for (let i = 1; i <= numOption; ++i) {
             let label = document.createElement('label');
             label.htmlFor = 'option-input-' + i;
             label.innerHTML = 'option-' + i;
@@ -184,7 +227,7 @@ function createNewQuiz(dateInfo, state) {
                 options: [],
                 correct: parseInt(document.getElementById('correct-option').value),
             };
-            for (let i = 0; i < numOption; ++i) {
+            for (let i = 1; i <= numOption; ++i) {
                 let option = document.getElementById('option-input-' + i).value;
                 newQuiz.options.push(option);
             }
@@ -335,19 +378,48 @@ function showDateList(datelist, state) {
 }
 
 // populate homepage-view with data from database
-for (let i = 0; i < courseList.length; ++i) {
-    let courseContainer = document.getElementById('course-container');
-    let button = document.createElement('button');
-    button.className = "item btn btn-primary p-4";
-    button.innerHTML = courseList[i].courseName;
-    if (courseList[i].state === "host") {
-        button.style['background-color'] = 'green';
+function showHomePage() {
+    resetHomepage();
+    for (let i = 0; i < courseList.length; ++i) {
+        let state = null;
+        if (userID === courseList[i].hostID) state = "host";
+        else if (courseList[i].participantID.includes(userID)) state = "participant";
+        else state = "outsider";
+        if (state === "host" || state === "participant") {
+            let courseContainer = document.getElementById('course-container');
+            let button = document.createElement('button');
+            button.className = "item btn btn-primary p-4";
+            button.innerHTML = courseList[i].courseName;
+            if (state === "host") button.style['background-color'] = 'green';
+            button.addEventListener('click', () => {
+                showDateList(courseList[i].datelist, state);
+            });
+            courseContainer.appendChild(button);
+        }
     }
-    button.addEventListener('click', () => {
-        showDateList(courseList[i].datelist, courseList[i].state);
-    });
-    courseContainer.appendChild(button);
 }
+
+
+let loginButton = document.getElementById("login-button");
+loginButton.addEventListener('click', async () => {
+    hideAllView();
+    homepageView.style.display = 'block';
+    let userName = document.getElementById('username').value;
+    userID = userName;
+    courses = await getData(userID);
+    courseList = courses.courseList;
+    showHomePage();
+});
+
+let deleteButton = document.getElementById("delete-data");
+deleteButton.addEventListener('click', async () => {
+    hideAllView();
+    homepageView.style.display = 'block';
+    await deleteAll();
+    courses = await getData(userID);
+    courseList = courses.courseList;
+    showHomePage();
+});
 
 // JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
 const fgCircle = document.querySelector('.fg-circle');
@@ -382,6 +454,7 @@ function showStatisticView() {
    let container = document.getElementById("statistic-container");
    container.appendChild(toHomePageButton);
 }
+
 // add event listner to statistic button such that clicking on it will bring us to statistic page
 let statButton = document.getElementById("statistic-button");
 statButton.addEventListener('click', showStatisticView);

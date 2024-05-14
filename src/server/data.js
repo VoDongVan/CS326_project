@@ -1,7 +1,11 @@
 let courseList = [
     {
         courseName: "Course 1 Test",
-        state: 'participant',
+        courseID: "course_1",
+        hostID: "user_2",
+        participantID: [
+            "user_1",
+        ],
         datelist: [
             {
                 date: new Date("2024-04-01"),
@@ -47,7 +51,12 @@ let courseList = [
 
     {
         courseName: "Course 2",
-        state: 'host',
+        courseID: "course_2",
+        hostID: "user_1",
+        participantID: [
+            "user_2",
+            "user_3",
+        ],
         datelist: [
             {
                 date: new Date("2024-04-01"),
@@ -86,7 +95,12 @@ let courseList = [
     },
     {
         courseName: "Course 3",
-        state: 'participant',
+        courseID: "course_3",
+        hostID: "user_3",
+        participantID: [
+            "user_1",
+            "user_2",
+        ],
         datelist: [
             {
                 date: new Date("2024-04-01"),
@@ -97,7 +111,12 @@ let courseList = [
     },
     {
         courseName: "Course 4",
-        state: 'host',
+        courseID: "course_4",
+        hostID: "user_1",
+        participantID: [
+            "user_2",
+            "user_3",
+        ],
         datelist: [
             {
                 date: new Date("2024-04-01"),

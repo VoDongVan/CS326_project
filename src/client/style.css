@@ -46,6 +46,13 @@ h2 {
     overflow: scroll;
 }
 
+#login-view {
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 45vh;
+  }
+
 /* Style for statistics*/
 #statistic-view .container2 {
     position: relative;
