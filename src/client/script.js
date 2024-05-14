@@ -64,7 +64,8 @@ let quizListView = document.getElementById('quizlist-view');
 let quizView = document.getElementById('quiz-view');
 let createQuizView = document.getElementById("create-quiz-view");
 let createCourseView = document.getElementById("create-course-view");
-let statisticView = document.getElementById('statistic-view');
+let joinCourseView = document.getElementById("join-course-view");
+//let statisticView = document.getElementById('statistic-view');
 
 let userID = null;
 /**
@@ -78,7 +79,8 @@ function hideAllView() {
     quizView.style.display = 'none';
     createQuizView.style.display = 'none';
     createCourseView.style.display = 'none';
-    statisticView.style.display = 'none';
+    joinCourseView.style.display = 'none';
+    //statisticView.style.display = 'none';
 }
 
 function resetHomepage() {
@@ -531,6 +533,45 @@ function showHomePage() {
     courseContainer.appendChild(newCourseButton);
 }
 
+function joinCourse(userID) {
+    let joinCourseView = document.getElementById('join-course-view');
+    //reset create-course-view
+    let reset = () => {
+        joinCourseView.innerHTML = `<div id="join-course-view" class="view" style="display: none;">
+        <label for="course-id">Course's ID</label>
+        <input type="text" id="course-id" required></div>`;
+    };
+    // to-homepage button go back to homepage
+    let toHomePageButton = document.createElement('button');
+    toHomePageButton.id = 'to-homepage';
+    toHomePageButton.innerHTML = 'Go Back';
+    toHomePageButton.addEventListener('click', () => {
+        hideAllView();
+        reset();
+        homepageView.style.display = 'block';
+    });
+    joinCourseView.appendChild(toHomePageButton);
+    //show create-course-view and hide other views
+    hideAllView();
+    joinCourseView.style.display = 'flex';
+    joinCourseView.style.flexDirection = 'column';
+    //submit new course
+    let joinCourseButton = document.createElement('button');
+    joinCourseButton.id = 'join-course-button';
+    joinCourseButton.innerHTML = 'submit';
+    joinCourseButton.addEventListener('click', () => {
+        if (!checkRequired('#join-course-view')) {
+            alert('some required inputs are blank');
+            return;
+        }
+        //get course's id
+        let courseID = document.getElementById('course-id').value;
+        console.log("user " + userID + " wants to join course with courseID: " + courseID);
+        showHomePage();
+    });
+    joinCourseView.appendChild(joinCourseButton);
+}
+
 let loginButton = document.getElementById("login-button");
 loginButton.addEventListener('click', async () => {
     hideAllView();
@@ -559,6 +600,12 @@ logoutButton.addEventListener('click', () => {
     loginView.style.display = 'block';
 });
 
+let joinCourseButton = document.getElementById('join-button');
+joinCourseButton.addEventListener('click', () => {
+    hideAllView();
+    joinCourseView.style.display = 'block';
+    joinCourse(userID);
+});
 // // JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
 // const fgCircle = document.querySelector('.fg-circle');
 // const percentageText = document.querySelector('.percentage');
