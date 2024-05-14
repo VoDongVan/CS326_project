@@ -62,6 +62,7 @@ export async function saveData(courses) {
 }
 
 export async function deleteAll() {
+  console.log("DELETE");
   await db.get('Courses').then(async function(doc) {
     await db.remove(doc).catch(err => console.log(err));
   });
@@ -89,5 +90,30 @@ export async function getData(user_id) {
 
 
   let courses = doc.courseList.filter(course => course.participantID.includes(user_id) || course.hostID.localeCompare(user_id) === 0);
+  return {courseList: courses};
+}
+
+export async function getDataByCourseID(course_id) {
+  const doc = await db.get('Courses').catch(function (err) {
+      if (err.name === 'not_found') {
+          // Default data
+          return {
+          _id: "Courses",
+          courseList: courseList,
+          };
+      } else { // hm, some other error
+        throw err;
+      }
+    });
+   // convert string to date
+  doc.courseList.forEach(course => {
+    course.datelist.forEach(date => {
+      date.date = new Date(date.date);
+      date.quizlist.forEach(quiz => quiz.timer = new Date(quiz.timer));
+    });
+  });
+
+
+  let courses = doc.courseList.filter(course => course.courseID.localeCompare(course_id) === 0);
   return {courseList: courses};
 }

@@ -44,14 +44,35 @@ async function save(response, data) {
 
 async function deleteALL(response) {
   try {
+    console.log("START DELETING");
     await db.deleteAll();
     response.writeHead(200, headerFields);
     response.write(`<h1>Deleted Success</h1>`);
     response.end();
   } catch (err) {
     response.writeHead(500, headerFields);
+    console.log("ERROR");
     response.write("<h1>Internal Server Error</h1>");
     response.write("<p>Unable to delete</p>");
+    response.end();
+  }
+}
+
+async function register(response, user_id, course_id) {
+  try {
+    const result = await db.getDataByCourseID(course_id);
+    result.courseList.forEach(course => {
+      course.participantID.push(user_id);
+    });
+    await db.saveData(result);
+    console.log("DONE SAVING");
+    response.writeHead(200, headerFields);
+    response.write(`<h1>Update Success</h1>`);
+    response.end();
+  } catch (err) {
+    console.log(err);
+    response.writeHead(404, headerFields);
+    response.write(`<h1>Course ${course_id} Not Found</h1>`);
     response.end();
   }
 }
@@ -100,13 +121,19 @@ app
  })
  .all(MethodNotAllowedHandler);
 
+ app
+ .route("/register")
+ .put(async (request, response) => {
+  const options = request.query;
+  register(response, options.user_id, options.course_id);
+ })
+ .all(MethodNotAllowedHandler);
 
 
 // this should always be the last route
 app.route("*").all(async (request, response) => {
  response.status(404).send(`Not found: ${request.path}`);
 });
-
 
 app.listen(port, () => {
  console.log(`Server started on port ${port}`);
