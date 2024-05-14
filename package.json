@@ -2,7 +2,7 @@
   "name": "QuizQZone",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "script.js",
   "type": "module",
   "license": "AGPL-version-3.0",
   "private": false,
@@ -29,7 +29,7 @@
     "Zih Nche znche@umass.edu znche"
   ],
   "scripts": {
-    "start": "http-server src/docs/milestone-01 -p 3000 -c-1 -o -s",
+    "start": "http-server src/server/server.js -p 3000 -c-1 -o -s",
     "dev": "",
     "test": "",
     "milestone-01": "http-server src/docs/milestone-01 -p 3000 -c-1 -o -s",
@@ -43,5 +43,10 @@
     "http-server": "^14.1.1",
     "pouchdb": "^8.0.1",
     "prettier": "^3.2.5"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jsdom": "^24.0.0",
+    "morgan": "^1.10.0"
   }
 }

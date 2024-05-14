@@ -355,11 +355,33 @@ const percentageText = document.querySelector('.percentage');
 
 
 // Set progress percentage (e.g., 75%)
-const percentage = 12/15 * 100;
+const numCorrect = 11
+const totalQuestions = 12
+const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
 const circumference = 1257; // Circumference of a circle with r=40
 const progress = circumference - (percentage / 100) * circumference;
 fgCircle.style.strokeDashoffset = progress;
 percentageText.textContent = percentage + '%';
+
+const URL = "http://localhost:3260"; // URL of our server
+//store the set up percentage in server db
+
+async function createCourse() {
+    
+    const name = courseList[0].courseName;
+    if (!name) {
+      alert("Counter name is required!");
+      return;
+    }
+  
+    const response = await fetch(`${URL}/create?name=${name}numCorrect=${numCorrect}totalQuestions=${totalQuestions}`, {
+      method: "POST",
+    });
+
+    const data = await response.text();
+  
+    console.log(data);
+  }
 
 
 // Show statistic view
@@ -381,7 +403,39 @@ function showStatisticView() {
    toHomePageButton.style.alignSelf = 'center';
    let container = document.getElementById("statistic-container");
    container.appendChild(toHomePageButton);
+
+   //display number of correct answers eg "12/15 correct answers"
+   const correctAnswers = document.getElementById('correct-answers')
+   correctAnswers.innerHTML = ""
+   correctAnswers.innerText = `${numCorrect}/${totalQuestions} Correct Answers`
 }
+
+
+
+//read and apply stats information for a course
+async function readCourse() {
+    const name = courseList[0].courseName;
+    if (!name) {
+      alert("Course name is required!");
+      return;
+    }
+  
+    const response = await fetch(`${URL}/read?name=${name}`, { method: "GET" });
+    const data = await response.json();
+  
+    console.log(data)
+  }
+
+  
+
+
 // add event listner to statistic button such that clicking on it will bring us to statistic page
+createCourse()
 let statButton = document.getElementById("statistic-button");
 statButton.addEventListener('click', showStatisticView);
+statButton.addEventListener('click', readCourse);
+
+
+
+
+

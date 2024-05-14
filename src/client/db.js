@@ -1,4 +1,5 @@
 import { courseList } from "./data.js"
+import PouchDB from "pouchdb";
 
 
 const db = new PouchDB("mydatabase");
