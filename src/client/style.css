@@ -1,0 +1,107 @@
+#datelist-view,
+#quizlist-view,
+#quiz-view,
+#option-list,
+#create-quiz-view,
+#option-input-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#to-homepage,
+#to-datelist,
+#to-quizlist,
+.new-date-button,
+.new-quiz-button,
+#option-list,
+#submit-parameter-button,
+.start-quiz-button {
+    align-self: center;
+    margin: 10px;
+}
+
+#new-course {
+    background-color: gray;
+    color: white;
+}
+
+#create-quiz-view label {
+    align-self: start;
+    margin: 10px 0px 5px 10px;
+}
+
+.delete-date,
+.delete-quiz {
+    margin: 10px;
+}
+
+.view input {
+    border: 2px solid gray;
+    margin: 5px 0px 10px 10px;
+}
+
+h1,
+h2 {
+    text-align: center;
+}
+
+.quizlist,
+.quiz {
+    margin: 10px;
+    height: 100px;
+}
+
+#course-container {
+    overflow: scroll;
+}
+
+#login-view {
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 45vh;
+  }
+
+/* Style for statistics*/
+#statistic-view .container2 {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+   
+   
+}
+
+.circle-wrapper {
+    margin-top: 2px;
+    width: 700px; /* Width of the SVG */
+    height: 600px; /* Height of the SVG */
+    display: flex;
+    justify-content: center;
+}
+       
+.bg-circle {
+    fill: none;
+    stroke: #d80b0b; /* Background color */
+    stroke-width: 30;
+}
+
+
+.fg-circle {
+    fill: none;
+    stroke: #18e31f; /* Foreground color */
+    stroke-width: 30;
+    stroke-dasharray: 1257; /* Circumference of a circle with r=40 */
+    stroke-dashoffset: 1257; /* To initially hide the progress */
+    transition: stroke-dashoffset 1s ease; /* Smooth animation */
+}
+
+
+.percentage {
+    font-size: 100px;
+    fill: #333; /* Text color */
+    font-family: Arial, sans-serif;
+}
+
+/* Style for statistics end here*/

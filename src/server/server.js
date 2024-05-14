@@ -95,6 +95,10 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+
+// The following code handles static file requests for the client-side code.
+// You do not need to modify this code. It serves the client-side files from
+// the `src/client` directory.
 app.use(express.static("src/client"));
 
 

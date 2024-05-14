@@ -14,39 +14,92 @@
  * @property {Quiz[]} quizlist - list of quizzes on this date
  */
 
-import { saveData, getData, removeData } from "./db.js";
+// import { removeData, deleteAll } from "../server/db.js";
+
+const URL = "http://localhost:3260"; // URL of our server
+
+async function deleteAll() {
+    const response = await fetch(`${URL}/deleteAll`, {
+        method: "DELETE",
+    });
+    console.log(response.text());
+}
+
+async function saveData(data) {
+    const response = await fetch(`${URL}/save`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+    console.log(response.text());
+}
+ 
+async function getData(user_id) {
+    const response = await fetch(`${URL}/get?userID=${user_id}`, {
+        method: "GET",
+    });
+    const data = await response.json();
+    // convert string to date
+    data.courseList.forEach(course => {
+        course.datelist.forEach(date => {
+        date.date = new Date(date.date);
+        date.quizlist.forEach(quiz => quiz.timer = new Date(quiz.timer));
+        });
+    });
+    return data;
+}
+
+async function register(user_id, course_id) {
+    const response = await fetch(`${URL}/register?user_id=${user_id}&course_id=${course_id}`, {
+        method: "PUT",
+    });
+    console.log(response.text());
+}
 
 // get courses data from database
-let courses = await getData();
-let courseList = courses.courseList;
+let courses = null;
+let courseList = null;
 
 // Get view element. Currently, there are 6 views: homepage, datelist, quizlist, quiz, create-quiz, statistic-view
+let loginView = document.getElementById('login-view');
 let homepageView = document.getElementById('homepage-view');
 let dateListView = document.getElementById('datelist-view');
 let quizListView = document.getElementById('quizlist-view');
 let quizView = document.getElementById('quiz-view');
 let createQuizView = document.getElementById("create-quiz-view");
-let statisticView = document.getElementById('statistic-view');
+let createCourseView = document.getElementById("create-course-view");
+let joinCourseView = document.getElementById("join-course-view");
+//let statisticView = document.getElementById('statistic-view');
 
+let userID = null;
 /**
  * Set display of all view to none. This function is used when switching view
  */
 function hideAllView() {
+    loginView.style.display = 'none';
     homepageView.style.display = 'none';
     dateListView.style.display = 'none';
     quizListView.style.display = 'none';
     quizView.style.display = 'none';
     createQuizView.style.display = 'none';
-    statisticView.style.display = 'none';
+    createCourseView.style.display = 'none';
+    joinCourseView.style.display = 'none';
+    //statisticView.style.display = 'none';
 }
 
+function resetHomepage() {
+    let courseContainer = document.getElementById('course-container');
+    courseContainer.innerHTML = "";
+}
 /**
  * Show quiz-view. Generate content for the quiz-view. There are 4 contents:
  * The question, the timer, the multiple options, and go back button
  * @param {Quiz} quiz - Information of the quiz. 
  */
  
-function showQuiz(quiz) {
+function showQuiz(quiz, state) {
     //display quiz-view and hide other views
     hideAllView();
     quizView.style.display = 'flex';
@@ -87,6 +140,39 @@ function showQuiz(quiz) {
     quizView.appendChild(question);
     quizView.appendChild(timer);
     quizView.appendChild(optionList);
+    //Start quiz button
+    if(state === 'host') {
+        // countdown function
+        let countdownfunc = () => {
+            let timeLeft = quiz.timer.getHours()*60*60*1000 + quiz.timer.getMinutes()*60*1000 + quiz.timer.getSeconds()*1000;
+            startQuizButton.innerHTML = 'Reset';
+            var timeout = setInterval(function() {
+                // code goes here
+                timeLeft = timeLeft - 1000;
+                if (timeLeft < 0) {
+                    clearInterval(timeout);
+                }
+                var hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                timer.innerHTML = hours + ":" + minutes + ":" + seconds;
+            }, 1000);
+            startQuizButton.onclick = () => {
+                clearInterval(timeout);
+                stopcountdownfunc();
+            }
+        }
+        let stopcountdownfunc = () => {
+            startQuizButton.innerHTML = 'Start';
+            timer.innerHTML = quiz.timer.getHours() + ":" + quiz.timer.getMinutes() + ":" + quiz.timer.getSeconds();
+            startQuizButton.onclick = countdownfunc;
+        }
+        let startQuizButton = document.createElement('button');
+        startQuizButton.classList.add("start-quiz-button");
+        startQuizButton.innerHTML = 'Start';
+        startQuizButton.onclick = countdownfunc;
+        quizView.appendChild(startQuizButton);
+    }
     quizView.appendChild(toQuizListButton);
 }
 
@@ -94,8 +180,8 @@ function showQuiz(quiz) {
  * Used for create new quiz. Check if all required input are filled or not
  * @returns {boolean}
  */
-function checkRequired() {
-    let requiredInput = document.querySelectorAll("input[required]");
+function checkRequired(parent) {
+    let requiredInput = document.querySelectorAll(`${parent} input[required]`);
     let flag = true;
     for (let i = 0; i < requiredInput.length; ++i) {
         if (requiredInput[i].value === "") {
@@ -135,7 +221,7 @@ function createNewQuiz(dateInfo, state) {
     submitParameterButton.innerHTML = "choose this questions and number of options?";
     submitParameterButton.addEventListener('click', () => {
         //check if all required input are filled
-        if (!checkRequired()) {
+        if (!checkRequired('#create-quiz-view')) {
             alert('some required inputs are blank');
             return;
         }
@@ -157,7 +243,7 @@ function createNewQuiz(dateInfo, state) {
         optionInputContainer.appendChild(label);
         optionInputContainer.appendChild(input);
         // generate input fields for options
-        for (let i = 0; i < numOption; ++i) {
+        for (let i = 1; i <= numOption; ++i) {
             let label = document.createElement('label');
             label.htmlFor = 'option-input-' + i;
             label.innerHTML = 'option-' + i;
@@ -173,7 +259,7 @@ function createNewQuiz(dateInfo, state) {
         submitButton.innerHTML = 'submit';
         submitButton.addEventListener('click', () => {
             // check if all required input are filled
-            if (!checkRequired()) {
+            if (!checkRequired('#create-quiz-view')) {
                 alert('some required inputs are blank');
                 return;
             }
@@ -184,7 +270,7 @@ function createNewQuiz(dateInfo, state) {
                 options: [],
                 correct: parseInt(document.getElementById('correct-option').value),
             };
-            for (let i = 0; i < numOption; ++i) {
+            for (let i = 1; i <= numOption; ++i) {
                 let option = document.getElementById('option-input-' + i).value;
                 newQuiz.options.push(option);
             }
@@ -254,8 +340,26 @@ function showQuizList(dateInfo, state) {
         let button = document.createElement('button');
         button.classList.add("quiz");
         button.innerHTML = quizlist[i].question;
-        button.addEventListener('click', () => showQuiz(quizlist[i]));
-        quizListView.appendChild(button);
+        button.addEventListener('click', () => showQuiz(quizlist[i], state));
+        if (state === "host") {
+            let quizButtonContainer = document.createElement('div');
+            quizButtonContainer.style['display'] = 'flex';
+            let deleteQuizButton = document.createElement('button');
+            deleteQuizButton.classList.add("delete-quiz");
+            deleteQuizButton.innerHTML = "remove";
+            deleteQuizButton.addEventListener('click', () => {
+                quizlist.splice(i, 1);
+                quizListView.innerHTML = "<h1>Quiz List</h1>";
+                saveData(courses);
+                showQuizList(dateInfo, state);
+            });
+            button.style['flex'] = "1";
+            quizButtonContainer.appendChild(button);
+            quizButtonContainer.appendChild(deleteQuizButton);
+            quizListView.appendChild(quizButtonContainer);
+        } else {
+            quizListView.appendChild(button);
+        }
     }
     // add new quiz button if user is host
     addNewQuizButton(quizListView, dateInfo, state);
@@ -321,6 +425,7 @@ function showDateList(datelist, state) {
     dateListView.appendChild(toHomePageButton);
     // quizlist button to move to quizlist-view.
     for (let i = 0; i < datelist.length; ++i) {
+        deleteButton.style['flex'] = "none";
         let button = document.createElement('button');
         button.classList.add("quizlist");
         button.innerHTML = datelist[i].date.toDateString();
@@ -328,7 +433,26 @@ function showDateList(datelist, state) {
             showQuizList(datelist[i], state);
         }
         );
-        dateListView.appendChild(button);
+        if (state === "host") {
+            let dateButtonContainer = document.createElement('div');
+            dateButtonContainer.style['display'] = 'flex';
+            let deleteDateButton = document.createElement('button');
+            deleteDateButton.classList.add("delete-date");
+            deleteDateButton.innerHTML = "remove";
+            deleteDateButton.addEventListener('click', () => {
+                datelist.splice(i, 1);
+                dateListView.innerHTML = "<h1>Date List</h1>";
+                homepageView.style.display = 'block';
+                saveData(courses);
+                showDateList(datelist, state);
+            });
+            button.style['flex'] = "1";
+            dateButtonContainer.appendChild(button);
+            dateButtonContainer.appendChild(deleteDateButton);
+            dateListView.appendChild(dateButtonContainer);
+        } else {
+            dateListView.appendChild(button);
+        }
     }
     // add new date button if user is host
     addNewDateButton(dateListView, datelist, state);
@@ -349,90 +473,289 @@ for (let i = 0; i < courseList.length; ++i) {
     courseContainer.appendChild(button);
 }
 
-// JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
-const fgCircle = document.querySelector('.fg-circle');
-const percentageText = document.querySelector('.percentage');
+// // JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
+// const fgCircle = document.querySelector('.fg-circle');
+// const percentageText = document.querySelector('.percentage');
 
 
-// Set progress percentage (e.g., 75%)
-const numCorrect = 13
-const totalQuestions = 123
-const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
-const circumference = 1257; // Circumference of a circle with r=40
-const progress = circumference - (percentage / 100) * circumference;
-fgCircle.style.strokeDashoffset = progress;
-percentageText.textContent = percentage + '%';
+// // Set progress percentage (e.g., 75%)
+// const numCorrect = 13
+// const totalQuestions = 123
+// const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
+// const circumference = 1257; // Circumference of a circle with r=40
+// const progress = circumference - (percentage / 100) * circumference;
+// fgCircle.style.strokeDashoffset = progress;
+// percentageText.textContent = percentage + '%';
 
-const URL = "http://localhost:3260"; // URL of our server
-//store the set up percentage in server db
 
-async function createCourse() {
-    const name = counterNameInput.value;
-    if (!name) {
-      alert("Counter name is required!");
-      return;
-    }
+// //store the set up percentage in server db
+
+// async function createCourse() {
+//     const name = counterNameInput.value;
+//     if (!name) {
+//       alert("Counter name is required!");
+//       return;
+//     }
   
-    const response = await fetch(`${URL}/create?name=${name}numCorrect=${numCorrect}totalQuestions=${totalQuestions}`, {
-      method: "POST",
+//     const response = await fetch(`${URL}/create?name=${name}numCorrect=${numCorrect}totalQuestions=${totalQuestions}`, {
+//       method: "POST",
+//     });
+
+//     const data = await response.text();
+  
+//     counterResponse.innerHTML = data;
+//   }
+
+
+// // Show statistic view
+// function showStatisticView() {
+//    // hide all view
+//    hideAllView();
+//    // show statistic view
+//    statisticView.style.display = "block";
+//    // add button to go back to homepage
+//    let toHomePageButton = document.createElement('button');
+//    toHomePageButton.id = 'to-homepage';
+//    toHomePageButton.innerHTML = 'Go Back';
+//    toHomePageButton.addEventListener('click', () => {
+//        hideAllView();
+//        homepageView.style.display = 'block';
+//        toHomePageButton.remove();
+//    });
+//    toHomePageButton.style.display = 'flex';
+//    toHomePageButton.style.alignSelf = 'center';
+//    let container = document.getElementById("statistic-container");
+//    container.appendChild(toHomePageButton);
+
+//    //display number of correct answers eg "12/15 correct answers"
+//    const correctAnswers = document.getElementById('correct-answers')
+//    correctAnswers.innerHTML = ""
+//    correctAnswers.innerText = `${numCorrect}/${totalQuestions} Correct Answers`
+// }
+
+
+
+// //read and apply stats information for a course
+// async function readCourse() {
+//     const name = counterNameInput.value;
+//     if (!name) {
+//       alert("Course name is required!");
+//       return;
+//     }
+  
+//     const response = await fetch(`${URL}/read?name=${name}`, { method: "GET" });
+//     const data = await response.json();
+  
+//     console.log(data)
+//   }
+
+  
+
+
+// // add event listner to statistic button such that clicking on it will bring us to statistic page
+// let statButton = document.getElementById("statistic-button");
+// statButton.addEventListener('click', showStatisticView);
+
+
+
+
+
+//create new course input
+function createNewCourse(userID) {
+    let createCourseView = document.getElementById('create-course-view');
+    //reset create-course-view
+    let reset = () => {
+        createCourseView.innerHTML = `<label for="course-name">Course's Name:</label>
+        <input type="text" id="course-name" required>
+        <label for="course-id">Course's ID:</label>
+        <input type="text" id="course-id">`;
+    };
+    // to-homepage button go back to homepage
+    let toHomePageButton = document.createElement('button');
+    toHomePageButton.id = 'to-homepage';
+    toHomePageButton.innerHTML = 'Go Back';
+    toHomePageButton.addEventListener('click', () => {
+        hideAllView();
+        reset();
+        homepageView.style.display = 'block';
     });
-
-    const data = await response.text();
-  
-    counterResponse.innerHTML = data;
-  }
-
-
-// Show statistic view
-function showStatisticView() {
-   // hide all view
-   hideAllView();
-   // show statistic view
-   statisticView.style.display = "block";
-   // add button to go back to homepage
-   let toHomePageButton = document.createElement('button');
-   toHomePageButton.id = 'to-homepage';
-   toHomePageButton.innerHTML = 'Go Back';
-   toHomePageButton.addEventListener('click', () => {
-       hideAllView();
-       homepageView.style.display = 'block';
-       toHomePageButton.remove();
-   });
-   toHomePageButton.style.display = 'flex';
-   toHomePageButton.style.alignSelf = 'center';
-   let container = document.getElementById("statistic-container");
-   container.appendChild(toHomePageButton);
-
-   //display number of correct answers eg "12/15 correct answers"
-   const correctAnswers = document.getElementById('correct-answers')
-   correctAnswers.innerHTML = ""
-   correctAnswers.innerText = `${numCorrect}/${totalQuestions} Correct Answers`
+    createCourseView.appendChild(toHomePageButton);
+    //show create-course-view and hide other views
+    hideAllView();
+    createCourseView.style.display = 'flex';
+    createCourseView.style.flexDirection = 'column';
+    //submit new course
+    let submitNewCourseButton = document.createElement('button');
+    submitNewCourseButton.id = 'submit-new-course-button';
+    submitNewCourseButton.innerHTML = 'submit';
+    submitNewCourseButton.addEventListener('click', () => {
+        if (!checkRequired('#create-course-view')) {
+            alert('some required inputs are blank');
+            return;
+        }
+        //get course's name
+        let courseName = document.getElementById('course-name').value;
+        let courseID = courseName + '_' + userID;
+        let newCourse = {
+            courseID: courseID,
+            courseName: courseName,
+            hostID: userID,
+            participantID: [],
+            datelist: [],
+        };
+        courseList.push(newCourse);
+        saveData(courses);
+        showHomePage();
+    });
+    createCourseView.appendChild(submitNewCourseButton);
 }
 
-
-
-//read and apply stats information for a course
-async function readCourse() {
-    const name = counterNameInput.value;
-    if (!name) {
-      alert("Course name is required!");
-      return;
+// populate homepage-view with data from database
+function showHomePage() {
+    resetHomepage();
+    for (let i = 0; i < courseList.length; ++i) {
+        let state = null;
+        if (userID === courseList[i].hostID) state = "host";
+        else if (courseList[i].participantID.includes(userID)) state = "participant";
+        else state = "outsider";
+        if (state === "host" || state === "participant") {
+            let courseContainer = document.getElementById('course-container');
+            let button = document.createElement('button');
+            button.className = "item btn btn-primary p-4";
+            button.innerHTML = courseList[i].courseName;
+            if (state === "host") button.style['background-color'] = 'green';
+            button.addEventListener('click', () => {
+                showDateList(courseList[i].datelist, state);
+            });
+            courseContainer.appendChild(button);
+        }
     }
-  
-    const response = await fetch(`${URL}/read?name=${name}`, { method: "GET" });
-    const data = await response.json();
-  
-    console.log(data)
-  }
+    let courseContainer = document.getElementById('course-container');
+    let newCourseButton = document.createElement('button');
+    newCourseButton.id = 'new-course';
+    newCourseButton.className = 'new-course-button item btn btn-primary p-4';
+    newCourseButton.innerHTML = 'New Course';
+    newCourseButton.addEventListener('click', () => {
+        createNewCourse(userID);
+    });
+    courseContainer.appendChild(newCourseButton);
+}
 
-  
+function joinCourse(userID) {
+    let joinCourseView = document.getElementById('join-course-view');
+    //reset create-course-view
+    let reset = () => {
+        joinCourseView.innerHTML = `<div id="join-course-view" class="view" style="display: none;">
+        <label for="course-id">Course's ID</label>
+        <input type="text" id="course-id" required></div>`;
+    };
+    // to-homepage button go back to homepage
+    let toHomePageButton = document.createElement('button');
+    toHomePageButton.id = 'to-homepage';
+    toHomePageButton.innerHTML = 'Go Back';
+    toHomePageButton.addEventListener('click', () => {
+        hideAllView();
+        reset();
+        homepageView.style.display = 'block';
+    });
+    joinCourseView.appendChild(toHomePageButton);
+    //show create-course-view and hide other views
+    hideAllView();
+    joinCourseView.style.display = 'flex';
+    joinCourseView.style.flexDirection = 'column';
+    //submit new course
+    let joinCourseButton = document.createElement('button');
+    joinCourseButton.id = 'join-course-button';
+    joinCourseButton.innerHTML = 'submit';
+    joinCourseButton.addEventListener('click', async () => {
+        if (!checkRequired('#join-course-view')) {
+            alert('some required inputs are blank');
+            return;
+        }
+        //get course's id
+        let courseID = document.getElementById('course-id').value;
+        console.log("user " + userID + " wants to join course with courseID: " + courseID);
+        // call register to server
+        await saveData(courses);
+        await register(userID, courseID);
+        courses = await getData(userID);
+        courseList = courses.courseList;
+        hideAllView();
+        reset();
+        homepageView.style.display = 'block';
+        showHomePage();
+    });
+    joinCourseView.appendChild(joinCourseButton);
+}
+
+let loginButton = document.getElementById("login-button");
+loginButton.addEventListener('click', async () => {
+    hideAllView();
+    homepageView.style.display = 'block';
+    let userName = document.getElementById('username').value;
+    userID = userName;
+    courses = await getData(userID);
+    courseList = courses.courseList;
+    showHomePage();
+    document.getElementById('username').value= "";
+});
+
+let deleteButton = document.getElementById("delete-data");
+deleteButton.addEventListener('click', async () => {
+    hideAllView();
+    homepageView.style.display = 'block';
+    await deleteAll();
+    courses = await getData(userID);
+    courseList = courses.courseList;
+    showHomePage();
+});
+
+let logoutButton = document.getElementById("logout-button");
+logoutButton.addEventListener('click', () => {
+    hideAllView();
+    loginView.style.display = 'block';
+});
+
+let joinCourseButton = document.getElementById('join-button');
+joinCourseButton.addEventListener('click', () => {
+    hideAllView();
+    joinCourseView.style.display = 'block';
+    joinCourse(userID);
+});
+// // JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
+// const fgCircle = document.querySelector('.fg-circle');
+// const percentageText = document.querySelector('.percentage');
 
 
-// add event listner to statistic button such that clicking on it will bring us to statistic page
-let statButton = document.getElementById("statistic-button");
-statButton.addEventListener('click', showStatisticView);
+// // Set progress percentage (e.g., 75%)
+// const percentage = 12/15 * 100;
+// const circumference = 1257; // Circumference of a circle with r=40
+// const progress = circumference - (percentage / 100) * circumference;
+// fgCircle.style.strokeDashoffset = progress;
+// percentageText.textContent = percentage + '%';
 
 
+// // Show statistic view
+// function showStatisticView() {
+//    // hide all view
+//    hideAllView();
+//    // show statistic view
+//    statisticView.style.display = "block";
+//    // add button to go back to homepage
+//    let toHomePageButton = document.createElement('button');
+//    toHomePageButton.id = 'to-homepage';
+//    toHomePageButton.innerHTML = 'Go Back';
+//    toHomePageButton.addEventListener('click', () => {
+//        hideAllView();
+//        homepageView.style.display = 'block';
+//        toHomePageButton.remove();
+//    });
+//    toHomePageButton.style.display = 'flex';
+//    toHomePageButton.style.alignSelf = 'center';
+//    let container = document.getElementById("statistic-container");
+//    container.appendChild(toHomePageButton);
+// }
 
-
-
+// // add event listner to statistic button such that clicking on it will bring us to statistic page
+// let statButton = document.getElementById("statistic-button");
+// statButton.addEventListener('click', showStatisticView);
