@@ -346,6 +346,8 @@ for (let i = 0; i < courseList.length; ++i) {
     button.addEventListener('click', () => {
         showDateList(courseList[i].datelist, courseList[i].state);
     });
+    //testing update course
+    button.addEventListener('click', () => updateCourse(2,5));
     courseContainer.appendChild(button);
 }
 
@@ -355,8 +357,8 @@ const percentageText = document.querySelector('.percentage');
 
 
 // Set progress percentage (e.g., 75%)
-const numCorrect = 11
-const totalQuestions = 12
+let numCorrect = 11
+let totalQuestions = 12
 const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
 const circumference = 1257; // Circumference of a circle with r=40
 const progress = circumference - (percentage / 100) * circumference;
@@ -374,9 +376,9 @@ async function createCourse() {
       return;
     }
   
-    const response = await fetch(`${URL}/create?name=${name}numCorrect=${numCorrect}totalQuestions=${totalQuestions}`, {
-      method: "POST",
-    });
+    const response = await fetch(`${URL}/create?name=${name}&numCorrect=${numCorrect}&totalQuestions=${totalQuestions}`, {
+        method: "POST",
+      });
 
     const data = await response.text();
   
@@ -422,20 +424,51 @@ async function readCourse() {
   
     const response = await fetch(`${URL}/read?name=${name}`, { method: "GET" });
     const data = await response.json();
-  
+    
+    numCorrect = data.numCorrect
+    totalQuestions = data.totalQuestions
+    
+    const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
+    const circumference = 1257; // Circumference of a circle with r=40
+    const progress = circumference - (percentage / 100) * circumference;
+    fgCircle.style.strokeDashoffset = progress;
+    percentageText.textContent = percentage + '%';
     console.log(data)
   }
 
+  //update based on correct or wrong answer 
+  async function updateCourse(num, total) {
+    const name = courseList[0].courseName
+    if (!name) {
+      alert("Counter name is required!");
+      return;
+    }
   
+    const response = await fetch(`${URL}/update?name=${name}&numCorrect=${num}&totalQuestions=${total}`, {
+        method: "PUT",
+      });
+
+    const data = await response.text();
+  
+    console.log(data)
+  }
 
 
 // add event listner to statistic button such that clicking on it will bring us to statistic page
 createCourse()
 let statButton = document.getElementById("statistic-button");
-statButton.addEventListener('click', showStatisticView);
-statButton.addEventListener('click', readCourse);
+// statButton.addEventListener('click', readCourse);
+// statButton.addEventListener('click', showStatisticView);
+statButton.addEventListener('click', () => {
+    readCourse().then(() => {
+        showStatisticView();
+    });
+});
 
+//testing update course
 
+let settings = document.getElementById('settings-btn');
+settings.addEventListener('click', ()=> updateCourse(3,5))
 
 
 

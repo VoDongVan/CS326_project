@@ -108,6 +108,8 @@ const MethodNotAllowedHandler = async (request, response) => {
   .route("/read")
   .get(async (request, response) => {
     const options = request.query;
+    console.log('options...')
+    console.log(options)
     readCourse(response, options.name);
   })
   .all(MethodNotAllowedHandler);

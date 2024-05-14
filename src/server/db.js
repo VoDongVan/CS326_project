@@ -7,8 +7,8 @@ export async function removeCourse(name) {
   }
   
   export async function loadCourse(name) {
-    const counter = await db.get(name);
-    return counter;
+    const course = await db.get(name);
+    return course;
   }
   
 

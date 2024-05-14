@@ -29,7 +29,7 @@
     "Zih Nche znche@umass.edu znche"
   ],
   "scripts": {
-    "start": "http-server src/server/server.js -p 3000 -c-1 -o -s",
+    "start": "node ./src/server/server.js", 
     "dev": "",
     "test": "",
     "milestone-01": "http-server src/docs/milestone-01 -p 3000 -c-1 -o -s",
