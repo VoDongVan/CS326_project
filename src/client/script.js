@@ -50,7 +50,13 @@ async function getData(user_id) {
     });
     return data;
 }
- 
+
+async function register(user_id, course_id) {
+    const response = await fetch(`${URL}/register?user_id=${user_id}&course_id=${course_id}`, {
+        method: "PUT",
+    });
+    console.log(response.text());
+}
 
 // get courses data from database
 let courses = null;
@@ -559,7 +565,7 @@ function joinCourse(userID) {
     let joinCourseButton = document.createElement('button');
     joinCourseButton.id = 'join-course-button';
     joinCourseButton.innerHTML = 'submit';
-    joinCourseButton.addEventListener('click', () => {
+    joinCourseButton.addEventListener('click', async () => {
         if (!checkRequired('#join-course-view')) {
             alert('some required inputs are blank');
             return;
@@ -567,6 +573,14 @@ function joinCourse(userID) {
         //get course's id
         let courseID = document.getElementById('course-id').value;
         console.log("user " + userID + " wants to join course with courseID: " + courseID);
+        // call register to server
+        await saveData(courses);
+        await register(userID, courseID);
+        courses = await getData(userID);
+        courseList = courses.courseList;
+        hideAllView();
+        reset();
+        homepageView.style.display = 'block';
         showHomePage();
     });
     joinCourseView.appendChild(joinCourseButton);
