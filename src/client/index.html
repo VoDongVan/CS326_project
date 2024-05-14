@@ -60,10 +60,10 @@
         <div class="master">
         <div class="container1 border col-4 align-content-center d-flex flex-wrap justify-content-center">
                 <button type="button" id="delete-data" class="item btn btn-secondary p-2">
-                    Delete Data
+                    Delete Data (for testing, don't click)
                 </button>
 
-                <button type="button" class="item btn btn-secondary p-2">
+                <!-- <button type="button" class="item btn btn-secondary p-2">
                     Home
                 </button>
                 <button id="statistic-button" type="button" class="item btn btn-secondary p-2">
@@ -71,8 +71,8 @@
                 </button>
                 <button type="button" class="item btn btn-secondary p-2">
                     Settings
-                </button>
-                <button type="button" class="item btn btn-secondary p-2">
+                </button> -->
+                <button id="logout-button" type="button" class="item btn btn-secondary p-2">
                     Logout
                 </button>
         </div>
@@ -104,6 +104,11 @@
         <label for="num-options">How many options for this question?</label>
         <input type="number" id="num-options" value="4" min="1" max="20">
         <div id="option-input-container"></div>
+    </div>
+
+    <div id="create-course-view" class="view" style="display: none;">
+        <label for="course-name">Course's Name:</label>
+        <input type="text" id="course-name" required>
     </div>
     
     <div id="statistic-view" style="display: none;">

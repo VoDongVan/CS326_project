@@ -63,6 +63,7 @@ let dateListView = document.getElementById('datelist-view');
 let quizListView = document.getElementById('quizlist-view');
 let quizView = document.getElementById('quiz-view');
 let createQuizView = document.getElementById("create-quiz-view");
+let createCourseView = document.getElementById("create-course-view");
 let statisticView = document.getElementById('statistic-view');
 
 let userID = null;
@@ -76,6 +77,7 @@ function hideAllView() {
     quizListView.style.display = 'none';
     quizView.style.display = 'none';
     createQuizView.style.display = 'none';
+    createCourseView.style.display = 'none';
     statisticView.style.display = 'none';
 }
 
@@ -89,7 +91,7 @@ function resetHomepage() {
  * @param {Quiz} quiz - Information of the quiz. 
  */
  
-function showQuiz(quiz) {
+function showQuiz(quiz, state) {
     //display quiz-view and hide other views
     hideAllView();
     quizView.style.display = 'flex';
@@ -130,6 +132,39 @@ function showQuiz(quiz) {
     quizView.appendChild(question);
     quizView.appendChild(timer);
     quizView.appendChild(optionList);
+    //Start quiz button
+    if(state === 'host') {
+        // countdown function
+        let countdownfunc = () => {
+            let timeLeft = quiz.timer.getHours()*60*60*1000 + quiz.timer.getMinutes()*60*1000 + quiz.timer.getSeconds()*1000;
+            startQuizButton.innerHTML = 'Reset';
+            var timeout = setInterval(function() {
+                // code goes here
+                timeLeft = timeLeft - 1000;
+                if (timeLeft < 0) {
+                    clearInterval(timeout);
+                }
+                var hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                timer.innerHTML = hours + ":" + minutes + ":" + seconds;
+            }, 1000);
+            startQuizButton.onclick = () => {
+                clearInterval(timeout);
+                stopcountdownfunc();
+            }
+        }
+        let stopcountdownfunc = () => {
+            startQuizButton.innerHTML = 'Start';
+            timer.innerHTML = quiz.timer.getHours() + ":" + quiz.timer.getMinutes() + ":" + quiz.timer.getSeconds();
+            startQuizButton.onclick = countdownfunc;
+        }
+        let startQuizButton = document.createElement('button');
+        startQuizButton.classList.add("start-quiz-button");
+        startQuizButton.innerHTML = 'Start';
+        startQuizButton.onclick = countdownfunc;
+        quizView.appendChild(startQuizButton);
+    }
     quizView.appendChild(toQuizListButton);
 }
 
@@ -137,8 +172,8 @@ function showQuiz(quiz) {
  * Used for create new quiz. Check if all required input are filled or not
  * @returns {boolean}
  */
-function checkRequired() {
-    let requiredInput = document.querySelectorAll("input[required]");
+function checkRequired(parent) {
+    let requiredInput = document.querySelectorAll(`${parent} input[required]`);
     let flag = true;
     for (let i = 0; i < requiredInput.length; ++i) {
         if (requiredInput[i].value === "") {
@@ -178,7 +213,7 @@ function createNewQuiz(dateInfo, state) {
     submitParameterButton.innerHTML = "choose this questions and number of options?";
     submitParameterButton.addEventListener('click', () => {
         //check if all required input are filled
-        if (!checkRequired()) {
+        if (!checkRequired('#create-quiz-view')) {
             alert('some required inputs are blank');
             return;
         }
@@ -216,7 +251,7 @@ function createNewQuiz(dateInfo, state) {
         submitButton.innerHTML = 'submit';
         submitButton.addEventListener('click', () => {
             // check if all required input are filled
-            if (!checkRequired()) {
+            if (!checkRequired('#create-quiz-view')) {
                 alert('some required inputs are blank');
                 return;
             }
@@ -297,8 +332,26 @@ function showQuizList(dateInfo, state) {
         let button = document.createElement('button');
         button.classList.add("quiz");
         button.innerHTML = quizlist[i].question;
-        button.addEventListener('click', () => showQuiz(quizlist[i]));
-        quizListView.appendChild(button);
+        button.addEventListener('click', () => showQuiz(quizlist[i], state));
+        if (state === "host") {
+            let quizButtonContainer = document.createElement('div');
+            quizButtonContainer.style['display'] = 'flex';
+            let deleteQuizButton = document.createElement('button');
+            deleteQuizButton.classList.add("delete-quiz");
+            deleteQuizButton.innerHTML = "remove";
+            deleteQuizButton.addEventListener('click', () => {
+                quizlist.splice(i, 1);
+                quizListView.innerHTML = "<h1>Quiz List</h1>";
+                saveData(courses);
+                showQuizList(dateInfo, state);
+            });
+            button.style['flex'] = "1";
+            quizButtonContainer.appendChild(button);
+            quizButtonContainer.appendChild(deleteQuizButton);
+            quizListView.appendChild(quizButtonContainer);
+        } else {
+            quizListView.appendChild(button);
+        }
     }
     // add new quiz button if user is host
     addNewQuizButton(quizListView, dateInfo, state);
@@ -364,6 +417,7 @@ function showDateList(datelist, state) {
     dateListView.appendChild(toHomePageButton);
     // quizlist button to move to quizlist-view.
     for (let i = 0; i < datelist.length; ++i) {
+        deleteButton.style['flex'] = "none";
         let button = document.createElement('button');
         button.classList.add("quizlist");
         button.innerHTML = datelist[i].date.toDateString();
@@ -371,10 +425,79 @@ function showDateList(datelist, state) {
             showQuizList(datelist[i], state);
         }
         );
-        dateListView.appendChild(button);
+        if (state === "host") {
+            let dateButtonContainer = document.createElement('div');
+            dateButtonContainer.style['display'] = 'flex';
+            let deleteDateButton = document.createElement('button');
+            deleteDateButton.classList.add("delete-date");
+            deleteDateButton.innerHTML = "remove";
+            deleteDateButton.addEventListener('click', () => {
+                datelist.splice(i, 1);
+                dateListView.innerHTML = "<h1>Date List</h1>";
+                homepageView.style.display = 'block';
+                saveData(courses);
+                showDateList(datelist, state);
+            });
+            button.style['flex'] = "1";
+            dateButtonContainer.appendChild(button);
+            dateButtonContainer.appendChild(deleteDateButton);
+            dateListView.appendChild(dateButtonContainer);
+        } else {
+            dateListView.appendChild(button);
+        }
     }
     // add new date button if user is host
     addNewDateButton(dateListView, datelist, state);
+}
+
+//create new course input
+function createNewCourse(userID) {
+    let createCourseView = document.getElementById('create-course-view');
+    //reset create-course-view
+    let reset = () => {
+        createCourseView.innerHTML = `<label for="course-name">Course's Name:</label>
+        <input type="text" id="course-name" required>
+        <label for="course-id">Course's ID:</label>
+        <input type="text" id="course-id">`;
+    };
+    // to-homepage button go back to homepage
+    let toHomePageButton = document.createElement('button');
+    toHomePageButton.id = 'to-homepage';
+    toHomePageButton.innerHTML = 'Go Back';
+    toHomePageButton.addEventListener('click', () => {
+        hideAllView();
+        reset();
+        homepageView.style.display = 'block';
+    });
+    createCourseView.appendChild(toHomePageButton);
+    //show create-course-view and hide other views
+    hideAllView();
+    createCourseView.style.display = 'flex';
+    createCourseView.style.flexDirection = 'column';
+    //submit new course
+    let submitNewCourseButton = document.createElement('button');
+    submitNewCourseButton.id = 'submit-new-course-button';
+    submitNewCourseButton.innerHTML = 'submit';
+    submitNewCourseButton.addEventListener('click', () => {
+        if (!checkRequired('#create-course-view')) {
+            alert('some required inputs are blank');
+            return;
+        }
+        //get course's name
+        let courseName = document.getElementById('course-name').value;
+        let courseID = courseName + '_' + userID;
+        let newCourse = {
+            courseID: courseID,
+            courseName: courseName,
+            hostID: userID,
+            participantID: [],
+            datelist: [],
+        };
+        courseList.push(newCourse);
+        saveData(courses);
+        showHomePage();
+    });
+    createCourseView.appendChild(submitNewCourseButton);
 }
 
 // populate homepage-view with data from database
@@ -397,8 +520,16 @@ function showHomePage() {
             courseContainer.appendChild(button);
         }
     }
+    let courseContainer = document.getElementById('course-container');
+    let newCourseButton = document.createElement('button');
+    newCourseButton.id = 'new-course';
+    newCourseButton.className = 'new-course-button item btn btn-primary p-4';
+    newCourseButton.innerHTML = 'New Course';
+    newCourseButton.addEventListener('click', () => {
+        createNewCourse(userID);
+    });
+    courseContainer.appendChild(newCourseButton);
 }
-
 
 let loginButton = document.getElementById("login-button");
 loginButton.addEventListener('click', async () => {
@@ -409,6 +540,7 @@ loginButton.addEventListener('click', async () => {
     courses = await getData(userID);
     courseList = courses.courseList;
     showHomePage();
+    document.getElementById('username').value= "";
 });
 
 let deleteButton = document.getElementById("delete-data");
@@ -421,40 +553,46 @@ deleteButton.addEventListener('click', async () => {
     showHomePage();
 });
 
-// JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
-const fgCircle = document.querySelector('.fg-circle');
-const percentageText = document.querySelector('.percentage');
+let logoutButton = document.getElementById("logout-button");
+logoutButton.addEventListener('click', () => {
+    hideAllView();
+    loginView.style.display = 'block';
+});
+
+// // JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
+// const fgCircle = document.querySelector('.fg-circle');
+// const percentageText = document.querySelector('.percentage');
 
 
-// Set progress percentage (e.g., 75%)
-const percentage = 12/15 * 100;
-const circumference = 1257; // Circumference of a circle with r=40
-const progress = circumference - (percentage / 100) * circumference;
-fgCircle.style.strokeDashoffset = progress;
-percentageText.textContent = percentage + '%';
+// // Set progress percentage (e.g., 75%)
+// const percentage = 12/15 * 100;
+// const circumference = 1257; // Circumference of a circle with r=40
+// const progress = circumference - (percentage / 100) * circumference;
+// fgCircle.style.strokeDashoffset = progress;
+// percentageText.textContent = percentage + '%';
 
 
-// Show statistic view
-function showStatisticView() {
-   // hide all view
-   hideAllView();
-   // show statistic view
-   statisticView.style.display = "block";
-   // add button to go back to homepage
-   let toHomePageButton = document.createElement('button');
-   toHomePageButton.id = 'to-homepage';
-   toHomePageButton.innerHTML = 'Go Back';
-   toHomePageButton.addEventListener('click', () => {
-       hideAllView();
-       homepageView.style.display = 'block';
-       toHomePageButton.remove();
-   });
-   toHomePageButton.style.display = 'flex';
-   toHomePageButton.style.alignSelf = 'center';
-   let container = document.getElementById("statistic-container");
-   container.appendChild(toHomePageButton);
-}
+// // Show statistic view
+// function showStatisticView() {
+//    // hide all view
+//    hideAllView();
+//    // show statistic view
+//    statisticView.style.display = "block";
+//    // add button to go back to homepage
+//    let toHomePageButton = document.createElement('button');
+//    toHomePageButton.id = 'to-homepage';
+//    toHomePageButton.innerHTML = 'Go Back';
+//    toHomePageButton.addEventListener('click', () => {
+//        hideAllView();
+//        homepageView.style.display = 'block';
+//        toHomePageButton.remove();
+//    });
+//    toHomePageButton.style.display = 'flex';
+//    toHomePageButton.style.alignSelf = 'center';
+//    let container = document.getElementById("statistic-container");
+//    container.appendChild(toHomePageButton);
+// }
 
-// add event listner to statistic button such that clicking on it will bring us to statistic page
-let statButton = document.getElementById("statistic-button");
-statButton.addEventListener('click', showStatisticView);
+// // add event listner to statistic button such that clicking on it will bring us to statistic page
+// let statButton = document.getElementById("statistic-button");
+// statButton.addEventListener('click', showStatisticView);

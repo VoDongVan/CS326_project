@@ -14,9 +14,15 @@
 .new-date-button,
 .new-quiz-button,
 #option-list,
-#submit-parameter-button {
+#submit-parameter-button,
+.start-quiz-button {
     align-self: center;
     margin: 10px;
+}
+
+#new-course {
+    background-color: gray;
+    color: white;
 }
 
 #create-quiz-view label {
@@ -24,7 +30,10 @@
     margin: 10px 0px 5px 10px;
 }
 
-
+.delete-date,
+.delete-quiz {
+    margin: 10px;
+}
 
 .view input {
     border: 2px solid gray;
