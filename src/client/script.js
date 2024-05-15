@@ -97,6 +97,7 @@ function resetHomepage() {
  * Show quiz-view. Generate content for the quiz-view. There are 4 contents:
  * The question, the timer, the multiple options, and go back button
  * @param {Quiz} quiz - Information of the quiz. 
+ * @param {string} state - The user is host or just participant
  */
  
 function showQuiz(quiz, state) {
@@ -458,7 +459,10 @@ function showDateList(datelist, state) {
     addNewDateButton(dateListView, datelist, state);
 }
 
-//create new course input
+/**
+ * Create New Course
+ * @param {string} userID - ID of the user
+ */
 function createNewCourse(userID) {
     let createCourseView = document.getElementById('create-course-view');
     //reset create-course-view
@@ -508,7 +512,9 @@ function createNewCourse(userID) {
     createCourseView.appendChild(submitNewCourseButton);
 }
 
-// populate homepage-view with data from database
+/**
+ * populate homepage-view with data from database
+ */
 function showHomePage() {
     resetHomepage();
     //testing update course
@@ -543,6 +549,10 @@ function showHomePage() {
     courseContainer.appendChild(newCourseButton);
 }
 
+/**
+ * Join a cour
+ * @param {string} userID - user's ID
+ */
 function joinCourse(userID) {
     let joinCourseView = document.getElementById('join-course-view');
     //reset create-course-view
@@ -652,8 +662,9 @@ const progress = circumference - (percentage / 100) * circumference;
 fgCircle.style.strokeDashoffset = progress;
 percentageText.textContent = percentage + '%';
 
-//store the set up percentage in server db
-
+/**
+ * store the set up percentage in server db
+ */
 async function createCourse() {
     
     const name = courseList[0].courseName;
@@ -672,7 +683,9 @@ async function createCourse() {
   }
 
 
-// Show statistic view
+/**
+ * show statistics view
+ */
 function showStatisticView() {
    // hide all view
    hideAllView();
@@ -699,8 +712,9 @@ function showStatisticView() {
 }
 
 
-
-//read and apply stats information for a course
+/**
+ * read and apply stats information for a course
+ */
 async function readCourse() {
     const name = courseList[0].courseName;
     if (!name) {
