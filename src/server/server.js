@@ -6,7 +6,13 @@ import * as serverdb from "./serverdb.js";
 
 
 const headerFields = { "Content-Type": "text/html" };
-//Name = course name numCorrect = num questions correct. totalQuestions = initial total number of questions for this course
+/**
+ * Create course for statistics database.
+ * @param {response} response - response object
+ * @param {string} name - name of the course
+ * @param {string} numCorrect - number of correct answer as string
+ * @param {string} totalQuestions - total number of questions as string
+ */
 async function createCourse(response, name, numCorrect, totalQuestions){
   if (name === undefined || totalQuestions === 0) {
       response.writeHead(400, headerFields);
@@ -34,8 +40,11 @@ async function createCourse(response, name, numCorrect, totalQuestions){
   }
 }
 
-//reads stats of a course
-
+/**
+ * reads stats of a course
+ * @param {response} response - response object
+ * @param {string} name - name of the course
+ */
 async function readCourse(response, name) {
   try {
     const course = await serverdb.loadCourse(name);
@@ -51,8 +60,13 @@ async function readCourse(response, name) {
 }
 
 
-//updates stats on a course
-
+/**
+ * updates stats on a course
+ * @param {response} response - response object
+ * @param {string} name - name of the course
+ * @param {string} numCorrect - number of correct answer as string
+ * @param {string} totalQuestions - total number of questions as string
+ */
 async function updateCourse(response, name, numCorrect, totalQuestions) {
   try {
     const course = await serverdb.loadCourse(name);
@@ -69,8 +83,11 @@ async function updateCourse(response, name, numCorrect, totalQuestions) {
   }
 }
 
-//deletes course stats
-
+/**
+ * deletes course stats
+ * @param {response} response - response object
+ * @param {string} name - name of the course
+ */
 async function deleteCourse(response, name) {
   try {
     const course = await serverdb.loadCourse(name);
@@ -86,7 +103,11 @@ async function deleteCourse(response, name) {
 }
 
 
-
+/**
+ * get course data by user id
+ * @param {response} response - response object
+ * @param {string} user_id - id of user
+ */
 async function get(response, user_id) {
    try {
      const result = await db.getData(user_id);
@@ -101,7 +122,11 @@ async function get(response, user_id) {
    }
 }
 
-
+/**
+ * save course data
+ * @param {response} response - response object
+ * @param {string} data - data to save as string
+ */
 async function save(response, data) {
    if (data === undefined) {
      response.writeHead(400, headerFields);
@@ -122,6 +147,10 @@ async function save(response, data) {
    }
 }
 
+/**
+ * deletes all course data
+ * @param {response} response - response object
+ */
 async function deleteALL(response) {
   try {
     console.log("START DELETING");
@@ -138,6 +167,12 @@ async function deleteALL(response) {
   }
 }
 
+/**
+ * register to new course
+ * @param {response} response - response object
+ * @param {string} user_id - user's id
+ * @param {string} course_id - to-join-course's id
+ */
 async function register(response, user_id, course_id) {
   try {
     const result = await db.getDataByCourseID(course_id);
