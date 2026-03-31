@@ -1,5 +1,7 @@
 import express from "express";
 import logger from "morgan";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import * as db from "./db.js";
 import * as serverdb from "./serverdb.js";
 // import { saveData, getData, removeData } from "./db.js";
@@ -281,6 +283,26 @@ app.route("*").all(async (request, response) => {
  response.status(404).send(`Not found: ${request.path}`);
 });
 
-app.listen(port, () => {
- console.log(`Server started on port ${port}`);
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+
+io.on("connection", (socket) => {
+  // client joins the room for their current course
+  socket.on("join-room", (courseID) => {
+    socket.join(courseID);
+  });
+
+  // host signals quiz start → broadcast to all participants in the room
+  socket.on("quiz-start", ({ courseID, dateIndex, quizIndex }) => {
+    socket.to(courseID).emit("quiz-start", { dateIndex, quizIndex });
+  });
+
+  // participant submitted an answer → notify host for live count
+  socket.on("answer-submitted", ({ courseID, userID }) => {
+    socket.to(courseID).emit("answer-submitted", { userID });
+  });
+});
+
+httpServer.listen(port, () => {
+  console.log(`Server started on port ${port}`);
 });

@@ -62,6 +62,9 @@ async function register(user_id, course_id) {
 let courses = null;
 let courseList = null;
 
+// Socket.io — gracefully no-ops if the server isn't running
+const socket = typeof io !== 'undefined' ? io() : null;
+
 // navigation state — set before each view transition so showQuiz knows its context
 let currentCourseID = null;
 let currentDateIndex = null;
@@ -177,6 +180,7 @@ function showQuiz(quiz, state) {
             if (!quiz.answers) quiz.answers = {};
             quiz.answers[userID] = parseInt(selected.value);
             submitBtn.innerHTML = 'Submitted!';
+            if (socket) socket.emit('answer-submitted', { courseID: currentCourseID, userID });
         });
         quizView.appendChild(submitBtn);
     }
@@ -203,7 +207,26 @@ function showQuiz(quiz, state) {
     const totalMs = quiz.timer.getHours()*3600000 + quiz.timer.getMinutes()*60000 + quiz.timer.getSeconds()*1000;
 
     if (state === 'host') {
-        // host manually starts/resets the countdown
+        // live answer counter — incremented by socket events from participants
+        let liveCount = document.createElement('p');
+        liveCount.id = 'live-answer-count';
+        liveCount.dataset.count = '0';
+        liveCount.innerHTML = 'Answers received: 0';
+        liveCount.style.fontStyle = 'italic';
+        quizView.appendChild(liveCount);
+        if (socket) {
+            // replace any previous listener to avoid stacking
+            socket.off('answer-submitted');
+            socket.on('answer-submitted', () => {
+                const el = document.getElementById('live-answer-count');
+                if (!el) return;
+                const n = parseInt(el.dataset.count) + 1;
+                el.dataset.count = String(n);
+                el.innerHTML = `Answers received: ${n}`;
+            });
+        }
+
+        // host manually starts/resets the countdown and signals participants
         let startQuizButton = document.createElement('button');
         startQuizButton.classList.add("start-quiz-button");
         startQuizButton.innerHTML = 'Start';
@@ -211,6 +234,11 @@ function showQuiz(quiz, state) {
             if (startQuizButton.innerHTML === 'Start') {
                 startQuizButton.innerHTML = 'Reset';
                 startCountdown(totalMs);
+                if (socket) socket.emit('quiz-start', {
+                    courseID: currentCourseID,
+                    dateIndex: currentDateIndex,
+                    quizIndex: currentQuizIndex,
+                });
             } else {
                 clearInterval(currentTimerInterval);
                 startQuizButton.innerHTML = 'Start';
@@ -614,6 +642,7 @@ function showHomePage() {
             button.addEventListener('click', () => {
                 currentCourseID = courseList[i].courseID;
                 currentCourseData = courseList[i];
+                if (socket) socket.emit('join-room', currentCourseID);
                 showDateList(courseList[i].datelist, state);
             });
             courseContainer.appendChild(button);
@@ -700,6 +729,18 @@ loginButton.addEventListener('click', async () => {
     if (autoJoin) {
         joinCourse(userID);
         document.getElementById('course-id').value = autoJoin;
+    }
+
+    // listen for host-triggered quiz start and auto-navigate participant to that quiz
+    if (socket) {
+        socket.off('quiz-start');
+        socket.on('quiz-start', ({ dateIndex, quizIndex }) => {
+            if (!currentCourseData) return;
+            currentDateIndex = dateIndex;
+            currentQuizIndex = quizIndex;
+            const quiz = currentCourseData.datelist[dateIndex].quizlist[quizIndex];
+            showQuiz(quiz, 'participant');
+        });
     }
 });
 
