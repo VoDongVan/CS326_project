@@ -85,6 +85,7 @@ let userID = null;
  * Set display of all view to none. This function is used when switching view
  */
 function hideAllView() {
+    clearInterval(currentTimerInterval); // stop any running quiz countdown
     loginView.style.display = 'none';
     homepageView.style.display = 'none';
     dateListView.style.display = 'none';
@@ -113,9 +114,11 @@ function showQuiz(quiz, state) {
     //display question as a h1 header
     let question = document.createElement('h1');
     question.innerHTML = quiz.question;
-    //display timer as a h2 header. Functionality does not yet supported. To be implemented in Milestone 3
+    // timer display
     let timer = document.createElement('h2');
-    timer.innerHTML = quiz.timer.getHours() + ":" + quiz.timer.getMinutes() + ":" + quiz.timer.getSeconds();
+    const initMM = String(quiz.timer.getMinutes()).padStart(2, '0');
+    const initSS = String(quiz.timer.getSeconds()).padStart(2, '0');
+    timer.innerHTML = initMM + ':' + initSS;
     //display options as radio input
     let optionList = document.createElement('div');
     optionList.id = 'option-list';
@@ -175,38 +178,47 @@ function showQuiz(quiz, state) {
         });
         quizView.appendChild(submitBtn);
     }
-    //Start quiz button
-    if(state === 'host') {
-        // countdown function
-        let countdownfunc = () => {
-            let timeLeft = quiz.timer.getHours()*60*60*1000 + quiz.timer.getMinutes()*60*1000 + quiz.timer.getSeconds()*1000;
-            startQuizButton.innerHTML = 'Reset';
-            var timeout = setInterval(function() {
-                // code goes here
-                timeLeft = timeLeft - 1000;
-                if (timeLeft < 0) {
-                    clearInterval(timeout);
-                }
-                var hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                var minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                var seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                timer.innerHTML = hours + ":" + minutes + ":" + seconds;
-            }, 1000);
-            startQuizButton.onclick = () => {
-                clearInterval(timeout);
-                stopcountdownfunc();
+    // helper: run a countdown from totalMs, updating the timer element each second
+    function startCountdown(totalMs) {
+        clearInterval(currentTimerInterval);
+        let timeLeft = totalMs;
+        currentTimerInterval = setInterval(() => {
+            timeLeft -= 1000;
+            if (timeLeft < 0) {
+                clearInterval(currentTimerInterval);
+                timer.innerHTML = '00:00';
+                // disable submit when time runs out
+                const btn = document.getElementById('submit-answer-btn');
+                if (btn) btn.disabled = true;
+                return;
             }
-        }
-        let stopcountdownfunc = () => {
-            startQuizButton.innerHTML = 'Start';
-            timer.innerHTML = quiz.timer.getHours() + ":" + quiz.timer.getMinutes() + ":" + quiz.timer.getSeconds();
-            startQuizButton.onclick = countdownfunc;
-        }
+            const mm = String(Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            const ss = String(Math.floor((timeLeft % (1000 * 60)) / 1000)).padStart(2, '0');
+            timer.innerHTML = mm + ':' + ss;
+        }, 1000);
+    }
+
+    const totalMs = quiz.timer.getHours()*3600000 + quiz.timer.getMinutes()*60000 + quiz.timer.getSeconds()*1000;
+
+    if (state === 'host') {
+        // host manually starts/resets the countdown
         let startQuizButton = document.createElement('button');
         startQuizButton.classList.add("start-quiz-button");
         startQuizButton.innerHTML = 'Start';
-        startQuizButton.onclick = countdownfunc;
+        startQuizButton.onclick = () => {
+            if (startQuizButton.innerHTML === 'Start') {
+                startQuizButton.innerHTML = 'Reset';
+                startCountdown(totalMs);
+            } else {
+                clearInterval(currentTimerInterval);
+                startQuizButton.innerHTML = 'Start';
+                timer.innerHTML = initMM + ':' + initSS;
+            }
+        };
         quizView.appendChild(startQuizButton);
+    } else {
+        // participant: countdown starts automatically
+        startCountdown(totalMs);
     }
     quizView.appendChild(toQuizListButton);
 }
