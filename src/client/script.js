@@ -79,6 +79,7 @@ let createQuizView = document.getElementById("create-quiz-view");
 let createCourseView = document.getElementById("create-course-view");
 let joinCourseView = document.getElementById("join-course-view");
 let statisticView = document.getElementById('statistic-view');
+let settingsView = document.getElementById('settings-view');
 
 let userID = null;
 /**
@@ -95,6 +96,7 @@ function hideAllView() {
     createCourseView.style.display = 'none';
     joinCourseView.style.display = 'none';
     statisticView.style.display = 'none';
+    settingsView.style.display = 'none';
 }
 
 function resetHomepage() {
@@ -559,13 +561,28 @@ function createNewCourse(userID) {
     createCourseView.appendChild(submitNewCourseButton);
 }
 
+function showSettings() {
+    hideAllView();
+    settingsView.style.display = 'flex';
+    document.getElementById('settings-username').textContent = userID;
+
+    const toggle = document.getElementById('dark-mode-toggle');
+    toggle.checked = document.body.classList.contains('dark-mode');
+    toggle.onchange = () => {
+        document.body.classList.toggle('dark-mode', toggle.checked);
+        localStorage.setItem('darkMode', String(toggle.checked));
+    };
+
+    document.getElementById('settings-back-btn').onclick = () => {
+        hideAllView();
+        homepageView.style.display = 'block';
+    };
+}
+
 // populate homepage-view with data from database
 function showHomePage() {
     resetHomepage();
-    //testing update course
-
-    let settings = document.getElementById('settings-btn');
-    settings.addEventListener('click', ()=> updateCourse(3,5));
+    document.getElementById('settings-btn').onclick = showSettings;
     for (let i = 0; i < courseList.length; ++i) {
         let state = null;
         if (userID === courseList[i].hostID) state = "host";
@@ -651,13 +668,11 @@ loginButton.addEventListener('click', async () => {
     userID = userName;
     courses = await getData(userID);
     courseList = courses.courseList;
+    // restore dark mode preference from previous session
+    if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
     showHomePage();
-    document.getElementById('username').value= "";
-
-
-    // add event listener to statistic button
-    let statButton = document.getElementById("statistic-button");
-    statButton.addEventListener('click', () => showStatisticView());
+    document.getElementById('username').value = "";
+    document.getElementById("statistic-button").onclick = showStatisticView;
 });
 
 let deleteButton = document.getElementById("delete-data");
