@@ -62,6 +62,13 @@ async function register(user_id, course_id) {
 let courses = null;
 let courseList = null;
 
+// navigation state — set before each view transition so showQuiz knows its context
+let currentCourseID = null;
+let currentDateIndex = null;
+let currentQuizIndex = null;
+let currentCourseData = null;    // full course object (for stats and socket nav)
+let currentTimerInterval = null; // handle for clearInterval on view change
+
 // Get view element. Currently, there are 6 views: homepage, datelist, quizlist, quiz, create-quiz, statistic-view
 let loginView = document.getElementById('login-view');
 let homepageView = document.getElementById('homepage-view');
@@ -118,7 +125,7 @@ function showQuiz(quiz, state) {
         optionLabel.innerText = quiz.options[i];
         let optionInput = document.createElement('input');
         optionInput.type = 'radio';
-        optionInput.value = quiz.options[i];
+        optionInput.value = i; // 0-indexed so we can grade against quiz.correct - 1
         optionInput.name = 'options';
         optionInput.id = 'option-' + i;
         let optionLabelContainer = document.createElement('div');
@@ -269,6 +276,7 @@ function createNewQuiz(dateInfo, state) {
                 timer: new Date(0, 0, 0, 0, 1, 30),
                 options: [],
                 correct: parseInt(document.getElementById('correct-option').value),
+                answers: {},
             };
             for (let i = 1; i <= numOption; ++i) {
                 let option = document.getElementById('option-input-' + i).value;
@@ -340,7 +348,10 @@ function showQuizList(dateInfo, state) {
         let button = document.createElement('button');
         button.classList.add("quiz");
         button.innerHTML = quizlist[i].question;
-        button.addEventListener('click', () => showQuiz(quizlist[i], state));
+        button.addEventListener('click', () => {
+            currentQuizIndex = i;
+            showQuiz(quizlist[i], state);
+        });
         if (state === "host") {
             let quizButtonContainer = document.createElement('div');
             quizButtonContainer.style['display'] = 'flex';
@@ -430,9 +441,9 @@ function showDateList(datelist, state) {
         button.classList.add("quizlist");
         button.innerHTML = datelist[i].date.toDateString();
         button.addEventListener('click', () => {
+            currentDateIndex = i;
             showQuizList(datelist[i], state);
-        }
-        );
+        });
         if (state === "host") {
             let dateButtonContainer = document.createElement('div');
             dateButtonContainer.style['display'] = 'flex';
@@ -527,6 +538,8 @@ function showHomePage() {
             button.innerHTML = courseList[i].courseName;
             if (state === "host") button.style['background-color'] = 'green';
             button.addEventListener('click', () => {
+                currentCourseID = courseList[i].courseID;
+                currentCourseData = courseList[i];
                 showDateList(courseList[i].datelist, state);
             });
             courseContainer.appendChild(button);

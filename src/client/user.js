@@ -3,6 +3,8 @@ export class user {
     course_ids_participant;
     course_ids_host;
     constructor(course_id, isHost) {
+        this.course_ids_host = [];
+        this.course_ids_participant = [];
         if(isHost) {
             this.course_ids_host.push(course_id);
         } else {

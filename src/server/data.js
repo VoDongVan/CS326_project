@@ -15,12 +15,14 @@ let courseList = [
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["0", "1", "2", "3"],
                         correct: 3,
+                        answers: {},
                     },
                     {
                         question: "10 - 2 = ",
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["7", "8", "9", "10"],
                         correct: 2,
+                        answers: {},
                     },
                 ]
             },
@@ -32,6 +34,7 @@ let courseList = [
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["red", "green", "blue"],
                         correct: 3,
+                        answers: {},
                     },
                 ]
             },
@@ -43,6 +46,7 @@ let courseList = [
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["because it has many problems", "because people cry looking at it"],
                         correct: 1,
+                        answers: {},
                     },
                 ]
             }
@@ -66,6 +70,7 @@ let courseList = [
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["0", "1", "2", "3"],
                         correct: 4,
+                        answers: {},
                     }
                 ]
             },
@@ -77,6 +82,7 @@ let courseList = [
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["gray", "green", "blue"],
                         correct: 2,
+                        answers: {},
                     },
                 ]
             },
@@ -88,6 +94,7 @@ let courseList = [
                         timer: new Date(0, 0, 0, 0, 1, 30),
                         options: ["because it is outstanding in its field", "I don't know"],
                         correct: 1,
+                        answers: {},
                     },
                 ]
             }
