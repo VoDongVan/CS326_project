@@ -555,8 +555,15 @@ function createNewCourse(userID) {
             datelist: [],
         };
         courseList.push(newCourse);
-        saveData(courses);
-        showHomePage();
+        const errEl = document.getElementById('create-error');
+        try {
+            await saveData(courses);
+            errEl.textContent = '';
+            showHomePage();
+        } catch (err) {
+            courseList.pop(); // undo optimistic push
+            errEl.textContent = 'Failed to save course. Please try again.';
+        }
     });
     createCourseView.appendChild(submitNewCourseButton);
 }
@@ -646,16 +653,20 @@ function joinCourse(userID) {
         }
         //get course's id
         let courseID = document.getElementById('course-id').value;
-        console.log("user " + userID + " wants to join course with courseID: " + courseID);
-        // call register to server
-        await saveData(courses);
-        await register(userID, courseID);
-        courses = await getData(userID);
-        courseList = courses.courseList;
-        hideAllView();
-        reset();
-        homepageView.style.display = 'block';
-        showHomePage();
+        const errEl = document.getElementById('join-error');
+        try {
+            await saveData(courses);
+            await register(userID, courseID);
+            courses = await getData(userID);
+            courseList = courses.courseList;
+            errEl.textContent = '';
+            hideAllView();
+            reset();
+            homepageView.style.display = 'block';
+            showHomePage();
+        } catch (err) {
+            errEl.textContent = 'Failed to join course. Check the course ID and try again.';
+        }
     });
     joinCourseView.appendChild(joinCourseButton);
 }
