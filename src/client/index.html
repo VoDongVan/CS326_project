@@ -14,80 +14,30 @@
   <body>
 
     <div id="login-view" class="view">
-        <label for="username">Username:</label>
-        <input type="text" id="username">
-        <button type="button" id="login-button">login</button>
+        <div class="login-card">
+            <div class="login-brand">
+                <h1>QuizQZone</h1>
+                <p>Enter your username to continue</p>
+            </div>
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="your-username">
+            <button type="button" id="login-button">Log In</button>
+        </div>
     </div>
     
-    <div id="homepage-view" class="view" style="height: 100vh; display: none;">
-        <div class="title border bg-light">
-        <center>
-            <h1>Courses</h1>
-        </center>
+    <div id="homepage-view" class="view" style="display: none;">
+        <div class="homepage-header">
+            <h1>QuizQZone</h1>
         </div>
-        
-        
-        <style>
-            .master {
-                display: flex;
-                height: 100%;
-            }
-        
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            .item {
-                margin-left: 2px;
-                margin-right: 2px;
-                margin-bottom: 10px;
-                text-align: center;
-               color: black;
-               width: 50%;
-               margin-top: 40px;
-               font-size: 20px;
-            }
-            .item4{
-        
-                background-color: black;
-            }
-            .container1 {
-                background-color: lightgray;
-            }
-        
-        
-        </style>
-        
-        <div class="master">
-        <div class="container1 border col-4 align-content-center d-flex flex-wrap justify-content-center">
-                <button type="button" id="delete-data" class="item btn btn-secondary p-2">
-                    Delete Data (for testing, don't click)
-                </button>
-
-                <!-- <button type="button" class="item btn btn-secondary p-2">
-                    Home
-                </button> -->
-                <button id="statistic-button" type="button" class="item btn btn-secondary p-2">
-                    Statistic
-                </button>
-                <button type="button" class="item btn btn-secondary p-2" id="settings-btn">
-                    Settings
-                </button>
-                <button id="join-button" type="button" class="item btn btn-secondary p-2">
-                    Join Course
-                </button>
-
-                <button id="logout-button" type="button" class="item btn btn-secondary p-2">
-                    Logout
-                </button>
-        </div>
-        
-        <div id="course-container" class="container2 d-flex flex-wrap border col-8 align-content-between justify-content-center">
-        
-            
-        
-        </div>
+        <div class="homepage-body">
+            <div class="sidebar">
+                <button type="button" id="statistic-button" class="sidebar-btn">Statistics</button>
+                <button type="button" id="settings-btn" class="sidebar-btn">Settings</button>
+                <button id="join-button" type="button" class="sidebar-btn">Join Course</button>
+                <button id="logout-button" type="button" class="sidebar-btn">Logout</button>
+                <button type="button" id="delete-data" class="sidebar-btn">Delete Data</button>
+            </div>
+            <div id="course-container"></div>
         </div>
     </div>
 
@@ -132,33 +82,26 @@
     <div id="settings-view" class="view" style="display: none;">
         <h2>Settings</h2>
         <p>Logged in as: <strong id="settings-username"></strong></p>
-        <div style="margin: 10px;">
-            <label>
-                <input type="checkbox" id="dark-mode-toggle"> Dark Mode
-            </label>
+        <div>
+            <input type="checkbox" id="dark-mode-toggle">
+            <label for="dark-mode-toggle">Dark Mode</label>
         </div>
         <button id="settings-back-btn">Back to Home</button>
     </div>
 
     <div id="statistic-view" style="display: none;">
-        <center>
-            <div class="container2 col-8" id="statistic-container">
-                <center>
-                    <h1 id="course-name">Course Name</h1>
-                    <div class="circle-wrapper">
-                        <svg class="progress-circle" width="700" height="500">
-                            <circle class="bg-circle" cx="350" cy="250" r="200"></circle>
-                            <circle class="fg-circle" cx="350" cy="250" r="200"></circle>
-                            <text x="50%" y="50%" id="percent1" text-anchor="middle" dominant-baseline="middle" class="percentage">75%</text>
-                        </svg>
-                    </div>
-       
-                    <h2 id="correct-answers">12/15 Correct Answers</h2>
-           
-                </center>
+        <div id="statistic-container">
+            <h1>Your Statistics</h1>
+            <div class="circle-wrapper">
+                <svg class="progress-circle" width="700" height="500">
+                    <circle class="bg-circle" cx="350" cy="250" r="200"></circle>
+                    <circle class="fg-circle" cx="350" cy="250" r="200"></circle>
+                    <text x="50%" y="50%" id="percent1" text-anchor="middle" dominant-baseline="middle" class="percentage">0%</text>
+                </svg>
             </div>
-        </center>
-       </div>
+            <p id="correct-answers">0/0 Correct Answers</p>
+        </div>
+    </div>
      
     
 

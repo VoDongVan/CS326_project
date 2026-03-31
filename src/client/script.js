@@ -506,7 +506,6 @@ function showDateList(datelist, state) {
     dateListView.appendChild(toHomePageButton);
     // quizlist button to move to quizlist-view.
     for (let i = 0; i < datelist.length; ++i) {
-        deleteButton.style['flex'] = "none";
         let button = document.createElement('button');
         button.classList.add("quizlist");
         button.innerHTML = datelist[i].date.toDateString();
@@ -636,9 +635,8 @@ function showHomePage() {
         if (state === "host" || state === "participant") {
             let courseContainer = document.getElementById('course-container');
             let button = document.createElement('button');
-            button.className = "item btn btn-primary p-4";
+            button.className = state === 'host' ? 'course-btn course-host' : 'course-btn course-participant';
             button.innerHTML = courseList[i].courseName;
-            if (state === "host") button.style['background-color'] = 'green';
             button.addEventListener('click', () => {
                 currentCourseID = courseList[i].courseID;
                 currentCourseData = courseList[i];
@@ -651,8 +649,8 @@ function showHomePage() {
     let courseContainer = document.getElementById('course-container');
     let newCourseButton = document.createElement('button');
     newCourseButton.id = 'new-course';
-    newCourseButton.className = 'new-course-button item btn btn-primary p-4';
-    newCourseButton.innerHTML = 'New Course';
+    newCourseButton.className = 'new-course-btn';
+    newCourseButton.innerHTML = '+';
     newCourseButton.addEventListener('click', () => {
         createNewCourse(userID);
     });
