@@ -643,16 +643,9 @@ loginButton.addEventListener('click', async () => {
     document.getElementById('username').value= "";
 
 
-    // add event listner to statistic button such that clicking on it will bring us to statistic page
-    createCourse()
+    // add event listener to statistic button
     let statButton = document.getElementById("statistic-button");
-    // statButton.addEventListener('click', readCourse);
-    // statButton.addEventListener('click', showStatisticView);
-    statButton.addEventListener('click', () => {
-        readCourse().then(() => {
-            showStatisticView();
-        });
-    });
+    statButton.addEventListener('click', () => showStatisticView());
 });
 
 let deleteButton = document.getElementById("delete-data");
@@ -679,105 +672,59 @@ joinCourseButton.addEventListener('click', () => {
 });
 
 
-// JS for Statistics Page (temporary, will move to another separated file later after we have decided on what this page should actually do)
+// JS for Statistics Page
 const fgCircle = document.querySelector('.fg-circle');
 const percentageText = document.querySelector('.percentage');
+const circumference = 1257; // 2π × r=200
 
 
-// Set progress percentage (e.g., 75%)
-let numCorrect = 11
-let totalQuestions = 12
-const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
-const circumference = 1257; // Circumference of a circle with r=40
-const progress = circumference - (percentage / 100) * circumference;
-fgCircle.style.strokeDashoffset = progress;
-percentageText.textContent = percentage + '%';
-
-//store the set up percentage in server db
-
-async function createCourse() {
-    
-    const name = courseList[0].courseName;
-    if (!name) {
-      alert("Counter name is required!");
-      return;
-    }
-  
-    const response = await fetch(`${URL}/create?name=${name}&numCorrect=${numCorrect}&totalQuestions=${totalQuestions}`, {
-        method: "POST",
-      });
-
-    const data = await response.text();
-  
-    console.log(data);
-  }
-
-
-// Show statistic view
+// Show statistic view — computes scores from actual quiz answers in memory
 function showStatisticView() {
-   // hide all view
    hideAllView();
-   // show statistic view
    statisticView.style.display = "block";
-   // add button to go back to homepage
+
+   // compute stats across all courses for the current user
+   let totalAnswered = 0;
+   let totalCorrect = 0;
+   courseList.forEach(course => {
+       course.datelist.forEach(dateEntry => {
+           dateEntry.quizlist.forEach(quiz => {
+               if (quiz.answers && quiz.answers[userID] !== undefined) {
+                   totalAnswered++;
+                   // quiz.correct is 1-indexed; stored answers are 0-indexed
+                   if (quiz.answers[userID] === quiz.correct - 1) {
+                       totalCorrect++;
+                   }
+               }
+           });
+       });
+   });
+
+   const pct = totalAnswered > 0 ? (totalCorrect / totalAnswered * 100).toFixed(1) : 0;
+   const progress = circumference - (pct / 100) * circumference;
+   fgCircle.style.strokeDashoffset = progress;
+   percentageText.textContent = pct + '%';
+
+   const correctAnswers = document.getElementById('correct-answers');
+   correctAnswers.innerText = `${totalCorrect}/${totalAnswered} Correct Answers`;
+
+   // remove any previous back button before adding a new one
+   const existing = document.getElementById('stats-back-btn');
+   if (existing) existing.remove();
+
    let toHomePageButton = document.createElement('button');
-   toHomePageButton.id = 'to-homepage';
+   toHomePageButton.id = 'stats-back-btn';
    toHomePageButton.innerHTML = 'Go Back';
    toHomePageButton.addEventListener('click', () => {
        hideAllView();
        homepageView.style.display = 'block';
-       toHomePageButton.remove();
    });
    toHomePageButton.style.display = 'flex';
    toHomePageButton.style.alignSelf = 'center';
-   let container = document.getElementById("statistic-container");
-   container.appendChild(toHomePageButton);
-
-   //display number of correct answers eg "12/15 correct answers"
-   const correctAnswers = document.getElementById('correct-answers')
-   correctAnswers.innerHTML = ""
-   correctAnswers.innerText = `${numCorrect}/${totalQuestions} Correct Answers`
+   document.getElementById("statistic-container").appendChild(toHomePageButton);
 }
 
 
 
-//read and apply stats information for a course
-async function readCourse() {
-    const name = courseList[0].courseName;
-    if (!name) {
-      alert("Course name is required!");
-      return;
-    }
-  
-    const response = await fetch(`${URL}/read?name=${name}`, { method: "GET" });
-    const data = await response.json();
-    
-    numCorrect = data.numCorrect
-    totalQuestions = data.totalQuestions
-    
-    const percentage = (numCorrect/totalQuestions * 100).toFixed(1); //1 decimal place max
-    const circumference = 1257; // Circumference of a circle with r=40
-    const progress = circumference - (percentage / 100) * circumference;
-    fgCircle.style.strokeDashoffset = progress;
-    percentageText.textContent = percentage + '%';
-    console.log(data)
-  }
-
-  //update based on correct or wrong answer 
-  async function updateCourse(num, total) {
-    const name = courseList[0].courseName
-    if (!name) {
-      alert("Counter name is required!");
-      return;
-    }
-  
-    const response = await fetch(`${URL}/update?name=${name}&numCorrect=${num}&totalQuestions=${total}`, {
-        method: "PUT",
-      });
-
-    const data = await response.text();
-  
-    console.log(data)
-  }
 
 
