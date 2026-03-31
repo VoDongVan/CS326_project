@@ -567,7 +567,7 @@ function createNewCourse(userID) {
     let submitNewCourseButton = document.createElement('button');
     submitNewCourseButton.id = 'submit-new-course-button';
     submitNewCourseButton.innerHTML = 'submit';
-    submitNewCourseButton.addEventListener('click', () => {
+    submitNewCourseButton.addEventListener('click', async () => {
         if (!checkRequired('#create-course-view')) {
             alert('some required inputs are blank');
             return;
