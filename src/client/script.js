@@ -559,7 +559,17 @@ function createNewCourse(userID) {
         try {
             await saveData(courses);
             errEl.textContent = '';
-            showHomePage();
+            // show QR code for participants to scan
+            const joinURL = `${window.location.origin}/?join=${courseID}`;
+            const qrDisplay = document.getElementById('qr-display');
+            qrDisplay.style.display = 'flex';
+            QRCode.toCanvas(document.getElementById('qr-canvas'), joinURL, { width: 180 });
+            document.getElementById('qr-url').textContent = joinURL;
+            // navigate home after a pause so the host can see/share the QR
+            setTimeout(() => {
+                qrDisplay.style.display = 'none';
+                showHomePage();
+            }, 4000);
         } catch (err) {
             courseList.pop(); // undo optimistic push
             errEl.textContent = 'Failed to save course. Please try again.';
@@ -684,6 +694,13 @@ loginButton.addEventListener('click', async () => {
     showHomePage();
     document.getElementById('username').value = "";
     document.getElementById("statistic-button").onclick = showStatisticView;
+
+    // if page was opened via a QR code join link, auto-open the join form
+    const autoJoin = new URLSearchParams(window.location.search).get('join');
+    if (autoJoin) {
+        joinCourse(userID);
+        document.getElementById('course-id').value = autoJoin;
+    }
 });
 
 let deleteButton = document.getElementById("delete-data");
