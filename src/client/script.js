@@ -110,6 +110,7 @@ function resetHomepage() {
  * Show quiz-view. Generate content for the quiz-view. There are 4 contents:
  * The question, the timer, the multiple options, and go back button
  * @param {Quiz} quiz - Information of the quiz. 
+ * @param {string} state - The user is host or just participant
  */
  
 function showQuiz(quiz, state) {
@@ -538,7 +539,10 @@ function showDateList(datelist, state) {
     addNewDateButton(dateListView, datelist, state);
 }
 
-//create new course input
+/**
+ * Create New Course
+ * @param {string} userID - ID of the user
+ */
 function createNewCourse(userID) {
     let createCourseView = document.getElementById('create-course-view');
     //reset create-course-view
@@ -623,7 +627,9 @@ function showSettings() {
     };
 }
 
-// populate homepage-view with data from database
+/**
+ * populate homepage-view with data from database
+ */
 function showHomePage() {
     resetHomepage();
     document.getElementById('settings-btn').onclick = showSettings;
@@ -657,6 +663,10 @@ function showHomePage() {
     courseContainer.appendChild(newCourseButton);
 }
 
+/**
+ * Join a cour
+ * @param {string} userID - user's ID
+ */
 function joinCourse(userID) {
     let joinCourseView = document.getElementById('join-course-view');
     //reset create-course-view
@@ -805,7 +815,6 @@ function showStatisticView() {
    // remove any previous back button before adding a new one
    const existing = document.getElementById('stats-back-btn');
    if (existing) existing.remove();
-
    let toHomePageButton = document.createElement('button');
    toHomePageButton.id = 'stats-back-btn';
    toHomePageButton.innerHTML = 'Go Back';
@@ -817,7 +826,6 @@ function showStatisticView() {
    toHomePageButton.style.alignSelf = 'center';
    document.getElementById("statistic-container").appendChild(toHomePageButton);
 }
-
 
 
 
