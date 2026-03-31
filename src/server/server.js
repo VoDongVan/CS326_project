@@ -138,6 +138,31 @@ async function deleteALL(response) {
   }
 }
 
+async function submitAnswer(response, courseID, dateIndex, quizIndex, userID, answer) {
+  try {
+    const data = await db.getDataByCourseID(courseID);
+    const course = data.courseList[0];
+    if (!course) {
+      response.writeHead(404, headerFields);
+      response.write(JSON.stringify({ error: "Course not found" }));
+      response.end();
+      return;
+    }
+    const quiz = course.datelist[dateIndex].quizlist[quizIndex];
+    if (!quiz.answers) quiz.answers = {};
+    quiz.answers[userID] = parseInt(answer);
+    await db.saveData(data);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.write(JSON.stringify({ success: true }));
+    response.end();
+  } catch (err) {
+    console.log(err);
+    response.writeHead(500, headerFields);
+    response.write(JSON.stringify({ error: "Failed to submit answer" }));
+    response.end();
+  }
+}
+
 async function register(response, user_id, course_id) {
   try {
     const result = await db.getDataByCourseID(course_id);
@@ -239,6 +264,14 @@ app
  .put(async (request, response) => {
   const options = request.query;
   register(response, options.user_id, options.course_id);
+ })
+ .all(MethodNotAllowedHandler);
+
+app
+ .route("/answer")
+ .put(async (request, response) => {
+   const q = request.query;
+   submitAnswer(response, q.courseID, parseInt(q.dateIndex), parseInt(q.quizIndex), q.userID, q.answer);
  })
  .all(MethodNotAllowedHandler);
 

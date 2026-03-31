@@ -147,6 +147,34 @@ function showQuiz(quiz, state) {
     quizView.appendChild(question);
     quizView.appendChild(timer);
     quizView.appendChild(optionList);
+    // Submit button — only for participants
+    if (state !== 'host') {
+        let submitBtn = document.createElement('button');
+        submitBtn.id = 'submit-answer-btn';
+        submitBtn.innerHTML = 'Submit Answer';
+        // pre-disable if already answered
+        if (quiz.answers && quiz.answers[userID] !== undefined) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Already Submitted';
+            // pre-select the previously chosen option
+            const prev = document.getElementById('option-' + quiz.answers[userID]);
+            if (prev) prev.checked = true;
+        }
+        submitBtn.addEventListener('click', async () => {
+            const selected = document.querySelector('input[name="options"]:checked');
+            if (!selected) { alert('Please select an answer first.'); return; }
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Submitting…';
+            await fetch(`${URL}/answer?courseID=${currentCourseID}&dateIndex=${currentDateIndex}&quizIndex=${currentQuizIndex}&userID=${userID}&answer=${selected.value}`, {
+                method: 'PUT',
+            });
+            // update local data so stats are current without re-fetch
+            if (!quiz.answers) quiz.answers = {};
+            quiz.answers[userID] = parseInt(selected.value);
+            submitBtn.innerHTML = 'Submitted!';
+        });
+        quizView.appendChild(submitBtn);
+    }
     //Start quiz button
     if(state === 'host') {
         // countdown function
